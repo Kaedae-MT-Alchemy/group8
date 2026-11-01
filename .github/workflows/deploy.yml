@@ -3,7 +3,7 @@ name: Deploy Flutter web to GitHub Pages
 on:
   push:
     branches:
-      - update-mt-alchemy
+      - main
   workflow_dispatch:
 
 permissions:
@@ -17,7 +17,6 @@ concurrency:
 
 jobs:
   build:
-    if: github.repository == 'fridayweekend/alchemylast'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,7 +29,7 @@ jobs:
           cache: true
 
       - name: Build Flutter web
-        run: flutter build web --release --base-href "/alchemylast/"
+        run: flutter build web --release --base-href "/group8/"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -38,7 +37,7 @@ jobs:
           path: build/web
 
   deploy:
-    if: github.ref == 'refs/heads/update-mt-alchemy'
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
