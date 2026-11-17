@@ -23,10 +23,12 @@ ShopOrder? _buyCourse({
     customerPhone: '${profile['phone'] ?? '-'}',
     billingAddress: '${profile['country'] ?? 'Malaysia'}',
     address: '',
-    paymentMethod: payment.status == 'Redirect'
+    paymentMethod:
+        payment.status == 'Redirect' || payment.method == 'Bank transfer'
         ? payment.method
         : '${payment.method} · ${payment.reference}',
     paymentStatus: payment.status == 'Redirect' ? 'Pending' : payment.status,
+    paymentReference: payment.reference,
     items: [
       CartLine(
         product: CommercePrototypeStore.courseProduct(
@@ -108,6 +110,12 @@ class _CourseEnrolScreenState extends State<CourseEnrolScreen> {
     }
     if (payment.successful) {
       _enrolAndOpen();
+      return;
+    }
+    if (order != null && order.isBankTransfer) {
+      // Bank transfer: show bank details and the receipt upload.
+      setState(() => _busy = false);
+      Navigator.pushNamed(context, '/order-details', arguments: order.number);
       return;
     }
     setState(() {
@@ -240,6 +248,10 @@ class _PurchaseCoursesPageState extends State<PurchaseCoursesPage> {
     if (order == null) return;
     if (payment.status == 'Redirect') {
       await StripeCheckout.payOrder(context, order);
+      return;
+    }
+    if (order.isBankTransfer) {
+      Navigator.pushNamed(context, '/order-details', arguments: order.number);
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(

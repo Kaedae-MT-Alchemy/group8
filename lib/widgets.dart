@@ -818,7 +818,12 @@ class _AccountMenu extends StatelessWidget {
   final VoidCallback onSignOut;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: AuthPrototypeStore.instance,
+    builder: (context, _) => _menu(context),
+  );
+
+  Widget _menu(BuildContext context) {
     final auth = AuthPrototypeStore.instance;
     final name = auth.displayName ?? auth.email ?? '';
     PopupMenuItem<String> item(String value, IconData icon, String label) =>

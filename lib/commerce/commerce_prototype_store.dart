@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../backend/backend.dart';
 import '../backend/collection_sync.dart';
+import '../shared/notifications.dart';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 
@@ -151,6 +152,11 @@ class ShopOrder {
     'shippingAddress': shippingAddress,
     'trackingNumber': trackingNumber,
     'stockReserved': stockReserved,
+    'paymentReference': paymentReference,
+    'proofStatus': proofStatus,
+    'transferReference': transferReference,
+    'proofSubmittedAt': proofSubmittedAt?.toIso8601String(),
+    'rejectReason': rejectReason,
   };
   factory ShopOrder.fromJson(Map<String, dynamic> json) => ShopOrder(
     number: json['number'] as String,
@@ -169,6 +175,13 @@ class ShopOrder {
     shippingAddress: json['shippingAddress'] as String?,
     trackingNumber: json['trackingNumber'] as String?,
     stockReserved: json['stockReserved'] as bool,
+    paymentReference: json['paymentReference'] as String?,
+    proofStatus: json['proofStatus'] as String?,
+    transferReference: json['transferReference'] as String?,
+    proofSubmittedAt: DateTime.tryParse(
+      json['proofSubmittedAt'] as String? ?? '',
+    ),
+    rejectReason: json['rejectReason'] as String?,
   );
 
   const ShopOrder({
@@ -186,7 +199,55 @@ class ShopOrder {
     this.shippingAddress,
     this.trackingNumber,
     this.stockReserved = false,
+    this.paymentReference,
+    this.proofStatus,
+    this.transferReference,
+    this.proofSubmittedAt,
+    this.rejectReason,
   });
+
+  static const _keep = Object();
+
+  ShopOrder copyWith({
+    String? paymentStatus,
+    String? paymentMethod,
+    String? fulfilmentStatus,
+    String? trackingNumber,
+    bool? stockReserved,
+    String? paymentReference,
+    Object? proofStatus = _keep,
+    Object? transferReference = _keep,
+    Object? proofSubmittedAt = _keep,
+    Object? rejectReason = _keep,
+  }) => ShopOrder(
+    number: number,
+    date: date,
+    lines: lines,
+    total: total,
+    paymentStatus: paymentStatus ?? this.paymentStatus,
+    paymentMethod: paymentMethod ?? this.paymentMethod,
+    fulfilmentStatus: fulfilmentStatus ?? this.fulfilmentStatus,
+    customerName: customerName,
+    customerEmail: customerEmail,
+    customerPhone: customerPhone,
+    billingAddress: billingAddress,
+    shippingAddress: shippingAddress,
+    trackingNumber: trackingNumber ?? this.trackingNumber,
+    stockReserved: stockReserved ?? this.stockReserved,
+    paymentReference: paymentReference ?? this.paymentReference,
+    proofStatus: identical(proofStatus, _keep)
+        ? this.proofStatus
+        : proofStatus as String?,
+    transferReference: identical(transferReference, _keep)
+        ? this.transferReference
+        : transferReference as String?,
+    proofSubmittedAt: identical(proofSubmittedAt, _keep)
+        ? this.proofSubmittedAt
+        : proofSubmittedAt as DateTime?,
+    rejectReason: identical(rejectReason, _keep)
+        ? this.rejectReason
+        : rejectReason as String?,
+  );
 
   final String number;
   final DateTime date;
@@ -202,6 +263,29 @@ class ShopOrder {
   final String? shippingAddress;
   final String? trackingNumber;
   final bool stockReserved;
+
+  /// Gateway reference, or for bank transfers the reference the customer
+  /// must quote (the order number).
+  final String? paymentReference;
+
+  /// Bank transfer receipt: null (none yet), Submitted, Verified, Rejected
+  /// or Expired.
+  final String? proofStatus;
+  final String? transferReference;
+  final DateTime? proofSubmittedAt;
+  final String? rejectReason;
+
+  bool get isBankTransfer => paymentMethod.startsWith('Bank transfer');
+
+  /// Real stores hold a bank transfer order for a few days, then cancel it
+  /// and release the stock if no payment arrives.
+  static const transferWindow = Duration(days: 3);
+  DateTime get transferDueAt => date.add(transferWindow);
+  bool get awaitingTransfer => isBankTransfer && paymentStatus == 'Pending';
+  bool get transferOverdue =>
+      awaitingTransfer &&
+      proofStatus != 'Submitted' &&
+      DateTime.now().isAfter(transferDueAt);
   bool get hasDigital => lines.any((line) => line.product.digital);
   bool get hasPhysical => lines.any((line) => !line.product.digital);
 }
@@ -1033,6 +1117,7 @@ class CommercePrototypeStore extends ChangeNotifier {
     required String address,
     required String paymentMethod,
     String paymentStatus = 'Pending',
+    String? paymentReference,
     List<CartLine>? items,
   }) {
     // [items] buys something outside the cart (a course or course seats).
@@ -1050,8 +1135,9 @@ class CommercePrototypeStore extends ChangeNotifier {
     )) {
       return null;
     }
+    final number = 'MA${DateTime.now().microsecondsSinceEpoch}';
     final order = ShopOrder(
-      number: 'MA${DateTime.now().microsecondsSinceEpoch}',
+      number: number,
       date: DateTime.now(),
       lines: List.unmodifiable(lines),
       total: subtotalAmount + (hasPhysical ? 10 : 0),
@@ -1066,6 +1152,11 @@ class CommercePrototypeStore extends ChangeNotifier {
       billingAddress: billingAddress,
       shippingAddress: hasPhysical ? address : null,
       stockReserved: hasPhysical && !failed,
+      // Bank transfers quote the order number so admin can match the
+      // deposit on the bank statement.
+      paymentReference: paymentMethod.startsWith('Bank transfer')
+          ? number
+          : paymentReference,
     );
     for (final line in lines.where(
       (line) => !line.product.digital && !failed,
@@ -1296,23 +1387,11 @@ class CommercePrototypeStore extends ChangeNotifier {
     } else if (status != 'Pending' && status != 'Available') {
       return;
     }
-    _orders[index] = ShopOrder(
-      number: previous.number,
-      date: previous.date,
-      lines: previous.lines,
-      total: previous.total,
-      paymentStatus: previous.paymentStatus,
-      paymentMethod: previous.paymentMethod,
+    _orders[index] = previous.copyWith(
       fulfilmentStatus: status,
-      customerName: previous.customerName,
-      customerEmail: previous.customerEmail,
-      customerPhone: previous.customerPhone,
-      billingAddress: previous.billingAddress,
-      shippingAddress: previous.shippingAddress,
       trackingNumber: status == 'Shipped'
           ? 'MT-${number.substring(number.length - 6)}'
-          : previous.trackingNumber,
-      stockReserved: previous.stockReserved,
+          : null,
     );
     notifyListeners();
   }
@@ -1325,21 +1404,10 @@ class CommercePrototypeStore extends ChangeNotifier {
     final o = _orders[index];
     if (o.paymentStatus == 'Paid') return true;
     final fulfilment = o.hasPhysical ? 'Processing' : 'Available';
-    final updated = ShopOrder(
-      number: o.number,
-      date: o.date,
-      lines: o.lines,
-      total: o.total,
+    final updated = o.copyWith(
       paymentStatus: 'Paid',
       paymentMethod: method,
       fulfilmentStatus: fulfilment,
-      customerName: o.customerName,
-      customerEmail: o.customerEmail,
-      customerPhone: o.customerPhone,
-      billingAddress: o.billingAddress,
-      shippingAddress: o.shippingAddress,
-      trackingNumber: o.trackingNumber,
-      stockReserved: o.stockReserved,
     );
     _orders[index] = updated;
     _orderSync.markSynced(number, _orderDoc(updated));
@@ -1359,6 +1427,143 @@ class CommercePrototypeStore extends ChangeNotifier {
       return false;
     }
   }
+
+  // ---------------------------------------------------------------------
+  // Bank transfer (manual payment), modelled on how real stores run it:
+  // the order is held as Pending with stock reserved, the customer pays
+  // into the company account quoting the order number and uploads the
+  // receipt, finance checks the bank statement and marks it paid or
+  // rejects the receipt, and unpaid orders are cancelled after 3 days.
+  // ---------------------------------------------------------------------
+
+  static const bankDetails = {
+    'Bank': 'Maybank Berhad',
+    'Account name': 'MT Alchemy Sdn Bhd',
+    'Account number': '5140 1234 5678',
+    'SWIFT': 'MBBEMYKL',
+  };
+
+  CollectionReference<Map<String, dynamic>> get _proofs =>
+      Backend.db.collection('paymentProofs');
+
+  /// Customer uploads the transfer receipt for their own pending order.
+  /// The image goes to `paymentProofs/{order}` so the order document stays
+  /// small. Returns null on success or a message to show.
+  Future<String?> submitTransferProof(
+    String number, {
+    required String transferReference,
+    required Uint8List receipt,
+  }) async {
+    final index = _orders.indexWhere((order) => order.number == number);
+    if (index < 0) return 'This order could not be found.';
+    final o = _orders[index];
+    if (!o.awaitingTransfer) return 'This order is not waiting for a transfer.';
+    final now = DateTime.now();
+    final updated = o.copyWith(
+      proofStatus: 'Submitted',
+      transferReference: transferReference.trim(),
+      proofSubmittedAt: now,
+      rejectReason: null,
+    );
+    if (Backend.isReady) {
+      try {
+        await _proofs.doc(CollectionSync.docId(number)).set({
+          'orderNumber': number,
+          'customerEmail': o.customerEmail.toLowerCase(),
+          'transferReference': transferReference.trim(),
+          'image': base64Encode(receipt),
+          'submittedAt': now.toIso8601String(),
+        });
+        await _orderSync.ref.doc(CollectionSync.docId(number)).update({
+          'proofStatus': 'Submitted',
+          'transferReference': transferReference.trim(),
+          'proofSubmittedAt': now.toIso8601String(),
+          'rejectReason': null,
+        });
+      } on FirebaseException catch (e) {
+        return 'Your receipt could not be uploaded (${e.code}). Please try again.';
+      } catch (_) {
+        return 'Your receipt could not be uploaded. Check your connection.';
+      }
+    }
+    _orders[index] = updated;
+    _orderSync.markSynced(number, _orderDoc(updated));
+    super.notifyListeners();
+    return null;
+  }
+
+  /// Loads the uploaded receipt image (admin, or the order's customer).
+  Future<Uint8List?> transferProof(String number) async {
+    if (!Backend.isReady) return null;
+    try {
+      final doc = await _proofs.doc(CollectionSync.docId(number)).get();
+      final image = doc.data()?['image'] as String?;
+      return image == null ? null : base64Decode(image);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Admin: the money is on the bank statement, so the order becomes Paid.
+  bool verifyTransfer(String number) {
+    if (!updatePaymentStatus(number, 'Paid')) return false;
+    final index = _orders.indexWhere((order) => order.number == number);
+    final o = _orders[index] = _orders[index].copyWith(
+      proofStatus: 'Verified',
+      rejectReason: null,
+    );
+    notifyListeners();
+    NotificationService.send(
+      recipient: o.customerEmail,
+      title: 'Payment received for ${o.number}',
+      body:
+          'We have confirmed your bank transfer of ${money(o.total)}. Your order is now ${o.fulfilmentStatus.toLowerCase()}.',
+      route: '/orders',
+    );
+    return true;
+  }
+
+  /// Admin: the receipt does not match a deposit. The customer can upload
+  /// a new one while the order is still within its payment window.
+  bool rejectTransfer(String number, String reason) {
+    final index = _orders.indexWhere((order) => order.number == number);
+    if (index < 0 || !_orders[index].awaitingTransfer) return false;
+    final o = _orders[index] = _orders[index].copyWith(
+      proofStatus: 'Rejected',
+      rejectReason: reason.trim(),
+    );
+    notifyListeners();
+    NotificationService.send(
+      recipient: o.customerEmail,
+      title: 'Transfer receipt not accepted for ${o.number}',
+      body:
+          '${reason.trim()} Please upload a clearer receipt or the correct one before ${_shortDate(o.transferDueAt)}.',
+      route: '/orders',
+    );
+    return true;
+  }
+
+  /// Admin: cancels bank transfer orders past their payment window that
+  /// have no receipt waiting, and puts their stock back. Returns how many.
+  int cancelOverdueTransfers() {
+    final overdue = _orders.where((o) => o.transferOverdue).toList();
+    for (final o in overdue) {
+      if (!updatePaymentStatus(o.number, 'Failed')) continue;
+      final index = _orders.indexWhere((x) => x.number == o.number);
+      _orders[index] = _orders[index].copyWith(proofStatus: 'Expired');
+      NotificationService.send(
+        recipient: o.customerEmail,
+        title: 'Order ${o.number} cancelled',
+        body:
+            'We did not receive your bank transfer within 3 days, so the order was cancelled and nothing was charged. You can place it again from the store.',
+        route: '/orders',
+      );
+    }
+    if (overdue.isNotEmpty) notifyListeners();
+    return overdue.length;
+  }
+
+  static String _shortDate(DateTime d) => '${d.day}/${d.month}/${d.year}';
 
   bool updatePaymentStatus(String number, String status) {
     final index = _orders.indexWhere((order) => order.number == number);
@@ -1417,20 +1622,9 @@ class CommercePrototypeStore extends ChangeNotifier {
         : status == 'Failed'
         ? 'Pending'
         : previous.fulfilmentStatus;
-    _orders[index] = ShopOrder(
-      number: previous.number,
-      date: previous.date,
-      lines: previous.lines,
-      total: previous.total,
+    _orders[index] = previous.copyWith(
       paymentStatus: status,
-      paymentMethod: previous.paymentMethod,
       fulfilmentStatus: nextFulfilment,
-      customerName: previous.customerName,
-      customerEmail: previous.customerEmail,
-      customerPhone: previous.customerPhone,
-      billingAddress: previous.billingAddress,
-      shippingAddress: previous.shippingAddress,
-      trackingNumber: previous.trackingNumber,
       stockReserved: stockReserved,
     );
     notifyListeners();

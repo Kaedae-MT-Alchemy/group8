@@ -181,6 +181,12 @@ class _CourseEditorState extends State<CourseEditor> {
     text: '${widget.course?.passMark ?? 60}',
   );
   late final videoUrl = TextEditingController(text: widget.course?.videoUrl);
+  late final resources = TextEditingController(
+    text: [
+      for (final r in widget.course?.resources ?? const <Map<String, String>>[])
+        '${r['kind'] ?? 'Article'} | ${r['title'] ?? ''} | ${r['url'] ?? ''}',
+    ].join('\n'),
+  );
   late String level = widget.course?.level ?? 'Beginner';
   late String status = widget.course?.status ?? 'Draft';
   late final prerequisites = {...?widget.course?.prerequisites};
@@ -200,6 +206,7 @@ class _CourseEditorState extends State<CourseEditor> {
       price,
       passMark,
       videoUrl,
+      resources,
     ]) {
       c.dispose();
     }
@@ -289,6 +296,7 @@ class _CourseEditorState extends State<CourseEditor> {
       status: status,
       passMark: int.parse(passMark.text.trim()),
       videoUrl: videoUrl.text.trim().isEmpty ? null : videoUrl.text.trim(),
+      resources: _parseResources(resources.text),
       modules: list,
       prerequisites: prerequisites.toList(),
       pdfName: pdfName,
@@ -429,6 +437,29 @@ class _CourseEditorState extends State<CourseEditor> {
                 },
               ),
               const SizedBox(height: 16),
+              TextFormField(
+                controller: resources,
+                minLines: 3,
+                maxLines: 8,
+                decoration: const InputDecoration(
+                  labelText: 'Resources (optional)',
+                  helperText:
+                      'One per line: Type | Title | https://link  (Type: Video, Article, Guide)',
+                  alignLabelWithHint: true,
+                ),
+                validator: (v) {
+                  for (final line in (v ?? '').split('\n')) {
+                    if (line.trim().isEmpty) continue;
+                    final url = line.split('|').last.trim();
+                    final u = Uri.tryParse(url);
+                    if (u == null || !u.isScheme('https')) {
+                      return 'Each line must end with an https:// link';
+                    }
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
               const Text('Prerequisites'),
               for (final c in mockCourses.where(
                 (c) => c.id != widget.course?.id,
@@ -522,3 +553,19 @@ class _EnrolmentCount extends StatelessWidget {
     ),
   );
 }
+
+List<Map<String, String>> _parseResources(String text) => [
+  for (final line in text.split('\n'))
+    if (line.trim().isNotEmpty)
+      () {
+        final parts = line.split('|').map((p) => p.trim()).toList();
+        final url = parts.last;
+        final kind = parts.length >= 3 ? parts[0] : 'Article';
+        final title = parts.length >= 3
+            ? parts.sublist(1, parts.length - 1).join(' | ')
+            : parts.length == 2
+            ? parts[0]
+            : url;
+        return {'kind': kind, 'title': title, 'url': url};
+      }(),
+];

@@ -64,6 +64,24 @@ service cloud.firestore {
         && resource.data.paymentStatus in ['Pending', 'Failed']
         && request.resource.data.paymentStatus == 'Paid'
         && changedOnly(['paymentStatus', 'fulfilmentStatus', 'paymentMethod']));
+      // Bank transfer: the customer attaches their receipt to a pending
+      // order. Only finance (admin) can then mark it Paid.
+      allow update: if signedIn()
+        && resource.data.customerEmail == myEmail()
+        && resource.data.paymentStatus == 'Pending'
+        && request.resource.data.proofStatus == 'Submitted'
+        && changedOnly(['proofStatus', 'transferReference', 'proofSubmittedAt', 'rejectReason']);
+      allow delete: if isAdmin();
+    }
+
+    // Bank transfer receipts, one per order, kept out of the order document.
+    match /paymentProofs/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.customerEmail == myEmail());
+      allow create, update: if signedIn()
+        && request.resource.data.customerEmail == myEmail()
+        && request.resource.data.image is string
+        && request.resource.data.image.size() < 900000
+        && get(/databases/$(database)/documents/orders/$(id)).data.customerEmail == myEmail();
       allow delete: if isAdmin();
     }
 
@@ -83,8 +101,11 @@ service cloud.firestore {
     }
 
     match /employees/{id} {
-      allow read: if isAdmin() || (isEmployer() && resource.data.organization == myEmail());
+      allow read: if isAdmin() || (isEmployer() && resource.data.organization == myEmail())
+        || (signedIn() && resource.data.email == myEmail());
       allow create, update: if isAdmin() || (isEmployer() && request.resource.data.organization == myEmail());
+      // An employee's own name change flows to their employer's list.
+      allow update: if signedIn() && resource.data.email == myEmail() && changedOnly(['name']);
       allow delete: if isAdmin() || (isEmployer() && resource.data.organization == myEmail());
     }
 

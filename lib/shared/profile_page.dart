@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 import '../widgets.dart';
 import 'auth_layout.dart';
+import 'image_compress.dart';
 import 'auth_prototype_store.dart';
 import 'learning_navigation.dart';
 
@@ -76,19 +76,16 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
     );
     final bytes = result?.files.single.bytes;
     if (bytes == null) return;
-    if (bytes.length > 8 * 1024 * 1024) {
-      _snack('Choose an image smaller than 8 MB.');
+    if (bytes.length > 25 * 1024 * 1024) {
+      _snack('Choose an image smaller than 25 MB.');
       return;
     }
-    try {
-      final codec = await ui.instantiateImageCodec(bytes, targetWidth: 256);
-      final frame = await codec.getNextFrame();
-      final png = await frame.image.toByteData(format: ui.ImageByteFormat.png);
-      if (png == null) throw StateError('encode');
-      setState(() => _photo = base64Encode(png.buffer.asUint8List()));
-    } catch (_) {
+    final small = compressImage(bytes, maxSide: 320, targetBytes: 60 * 1024);
+    if (small == null) {
       _snack('That image could not be read. Try a JPG or PNG.');
+      return;
     }
+    setState(() => _photo = base64Encode(small));
   }
 
   void _snack(String text) =>

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../backend/backend.dart';
@@ -139,6 +141,7 @@ class AuthPrototypeStore extends ChangeNotifier {
           ? data['displayName'] as String
           : _email;
       _profile = data;
+      _watchProfile(user.uid);
       await CommercePrototypeStore.instance.attach(role: _role, email: _email);
       await selectLearner(_email);
       notifyListeners();
@@ -161,6 +164,18 @@ class AuthPrototypeStore extends ChangeNotifier {
           for (final e in details.entries) e.key: e.value.trim(),
       };
       await Backend.db.collection('users').doc(_uid).update(update);
+      if (name.trim() != _displayName && _role == 'Learner') {
+        // Keep the employer's employee list in step with the new name.
+        try {
+          final records = await Backend.db
+              .collection('employees')
+              .where('email', isEqualTo: _email)
+              .get();
+          for (final doc in records.docs) {
+            await doc.reference.update({'name': name.trim()});
+          }
+        } catch (_) {}
+      }
       _displayName = name.trim();
       _profile = {..._profile, ...update};
       notifyListeners();
@@ -175,7 +190,37 @@ class AuthPrototypeStore extends ChangeNotifier {
 
   /// Clears the session synchronously (so the next route is unprotected),
   /// then signs out of Firebase.
+  StreamSubscription<dynamic>? _profileSub;
+
+  /// Keeps the signed-in user's name, role and details live: edits made on
+  /// another device or by an admin show up immediately.
+  void _watchProfile(String uid) {
+    _profileSub?.cancel();
+    _profileSub = Backend.db.collection('users').doc(uid).snapshots().listen((
+      snap,
+    ) {
+      final data = snap.data();
+      if (data == null || _uid != uid) return;
+      if (data['status'] == 'Suspended') {
+        lastError = 'This account is suspended. Contact MT Alchemy for help.';
+        signOut();
+        return;
+      }
+      final name = (data['displayName'] as String?)?.trim();
+      _displayName = name == null || name.isEmpty ? _email : name;
+      final role = data['role'] as String?;
+      if (allRoles.contains(role) && role != _role) {
+        _role = role;
+        CommercePrototypeStore.instance.attach(role: _role, email: _email);
+      }
+      _profile = data;
+      notifyListeners();
+    }, onError: (_) {});
+  }
+
   Future<void> signOut() async {
+    _profileSub?.cancel();
+    _profileSub = null;
     _uid = null;
     _email = null;
     _role = null;

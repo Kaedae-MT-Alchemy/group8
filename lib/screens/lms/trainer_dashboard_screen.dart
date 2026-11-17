@@ -305,28 +305,31 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
     );
   }
 
-  Widget _hero(BuildContext context) => DashboardHeader(
-    eyebrow: 'Trainer workspace',
-    title: 'Welcome, ${AuthPrototypeStore.instance.displayName ?? 'Trainer'}',
-    subtitle:
-        'Review quiz submissions, give feedback, follow learner progress and keep courses up to date.',
-    image: 'assets/images/stock/facilitator.jpg',
-    actions: [
-      HeaderButton(
-        label: 'Review submissions',
-        icon: Icons.rate_review_outlined,
-        primary: true,
-        onPressed: () => setState(() {
-          _tab = 0;
-          _attemptFilter = 'Submitted';
-        }),
-      ),
-      HeaderButton(
-        label: 'Manage courses',
-        icon: Icons.edit_note,
-        onPressed: () => Navigator.pushNamed(context, '/admin/courses'),
-      ),
-    ],
+  Widget _hero(BuildContext context) => ListenableBuilder(
+    listenable: AuthPrototypeStore.instance,
+    builder: (context, _) => DashboardHeader(
+      eyebrow: 'Trainer workspace',
+      title: 'Welcome, ${AuthPrototypeStore.instance.displayName ?? 'Trainer'}',
+      subtitle:
+          'Review quiz submissions, give feedback, follow learner progress and keep courses up to date.',
+      image: 'assets/images/stock/facilitator.jpg',
+      actions: [
+        HeaderButton(
+          label: 'Review submissions',
+          icon: Icons.rate_review_outlined,
+          primary: true,
+          onPressed: () => setState(() {
+            _tab = 0;
+            _attemptFilter = 'Submitted';
+          }),
+        ),
+        HeaderButton(
+          label: 'Manage courses',
+          icon: Icons.edit_note,
+          onPressed: () => Navigator.pushNamed(context, '/admin/courses'),
+        ),
+      ],
+    ),
   );
 
   Widget _scoreChart(List<QuizAttempt> attempts) {

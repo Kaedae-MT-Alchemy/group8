@@ -3,12 +3,12 @@ import '../../shared/file_export.dart';
 import '../../shared/learning_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../widgets.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/mock_data.dart';
 import '../../data/progress_store.dart';
 import '../../theme.dart';
 import '../../widgets/lms/content_viewer.dart';
+import '../../widgets/lms/course_media.dart';
 import '../../widgets/lms/module_sidebar.dart';
 import '../../widgets/lms/progress_bar_card.dart';
 
@@ -180,26 +180,18 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen> {
                   if (_course.videoUrl != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: Material(
-                        color: const Color(0xFFF1ECFB),
-                        borderRadius: BorderRadius.circular(14),
-                        child: ListTile(
-                          leading: const Icon(
-                            Icons.play_circle_fill,
-                            color: purple,
-                            size: 36,
-                          ),
-                          title: const Text('Lesson video'),
-                          subtitle: Text(_course.videoUrl!),
-                          trailing: const Icon(Icons.open_in_new),
-                          onTap: () => launchUrl(
-                            Uri.parse(_course.videoUrl!),
-                            webOnlyWindowName: '_blank',
-                          ),
-                        ),
-                      ),
+                      child: CourseVideo(url: _course.videoUrl!),
                     ),
                   ContentViewer(lesson: _lessons[_current]),
+                  if (_course.resources.isNotEmpty) ...[
+                    const SizedBox(height: 18),
+                    Text(
+                      'Course resources',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    CourseResources(course: _course),
+                  ],
                 ],
               ),
             ),

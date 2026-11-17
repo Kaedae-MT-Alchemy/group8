@@ -162,7 +162,7 @@ class _PaymentDialogState extends State<_PaymentDialog> {
           method: 'Bank transfer',
           reference: ref,
           message:
-              'Transfer the amount quoting $ref. We confirm transfers within one working day.',
+              'Your order is reserved for 3 days. Transfer the amount and upload the receipt on the order page.',
         );
     }
     Navigator.pop(context, result);
@@ -355,7 +355,7 @@ class _PaymentDialogState extends State<_PaymentDialog> {
                   )
                 else
                   const Text(
-                    'Your order is created now and marked Pending. Our team confirms the transfer and updates the status.',
+                    'Your order is reserved for 3 days and marked Pending. Next you get our bank details and a reference to quote, then upload your receipt. Our finance team verifies it and confirms the order, usually within one working day.',
                     style: TextStyle(height: 1.45),
                   ),
               ],

@@ -98,7 +98,29 @@
       "quiz": [],
       "status": "Published",
       "passMark": 60,
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=D6_J7FfgWVc",
+      "resources": [
+        {
+          "kind": "Video",
+          "title": "6 Steps to Improve Your Emotional Intelligence (Ramona Hacker, TEDxTUM)",
+          "url": "https://www.youtube.com/watch?v=D6_J7FfgWVc"
+        },
+        {
+          "kind": "Video",
+          "title": "Daniel Goleman introduces Emotional Intelligence (Big Think)",
+          "url": "https://www.youtube.com/watch?v=Y7m9eNoB3NU"
+        },
+        {
+          "kind": "Article",
+          "title": "What is emotional intelligence? (Greater Good Science Center, UC Berkeley)",
+          "url": "https://greatergood.berkeley.edu/topic/emotional_intelligence/definition"
+        },
+        {
+          "kind": "Article",
+          "title": "What Makes a Leader? by Daniel Goleman (Harvard Business Review)",
+          "url": "https://hbr.org/2004/01/what-makes-a-leader"
+        }
+      ],
       "position": 0,
       "pdfChunks": 0
     },
@@ -123,7 +145,24 @@
       "quiz": [],
       "status": "Published",
       "passMark": 60,
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=qzR62JJCMBQ",
+      "resources": [
+        {
+          "kind": "Video",
+          "title": "All it takes is 10 mindful minutes (Andy Puddicombe, TED)",
+          "url": "https://www.youtube.com/watch?v=qzR62JJCMBQ"
+        },
+        {
+          "kind": "Article",
+          "title": "What is mindfulness? (Greater Good Science Center, UC Berkeley)",
+          "url": "https://greatergood.berkeley.edu/topic/mindfulness/definition"
+        },
+        {
+          "kind": "Guide",
+          "title": "Mindfulness: how it helps and how to practise it (NHS)",
+          "url": "https://www.nhs.uk/mental-health/self-help/tips-and-support/mindfulness/"
+        }
+      ],
       "position": 1,
       "pdfChunks": 0
     },
@@ -150,7 +189,24 @@
       "quiz": [],
       "status": "Published",
       "passMark": 60,
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=qp0HIF3SfI4",
+      "resources": [
+        {
+          "kind": "Video",
+          "title": "How great leaders inspire action (Simon Sinek, TED)",
+          "url": "https://www.youtube.com/watch?v=qp0HIF3SfI4"
+        },
+        {
+          "kind": "Article",
+          "title": "What Makes a Leader? by Daniel Goleman (Harvard Business Review)",
+          "url": "https://hbr.org/2004/01/what-makes-a-leader"
+        },
+        {
+          "kind": "Article",
+          "title": "Leading change: why transformation efforts fail (John Kotter, HBR)",
+          "url": "https://hbr.org/2007/01/leading-change-why-transformation-efforts-fail"
+        }
+      ],
       "position": 2,
       "pdfChunks": 0
     },
@@ -175,7 +231,24 @@
       "quiz": [],
       "status": "Published",
       "passMark": 60,
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=eIho2S0ZahI",
+      "resources": [
+        {
+          "kind": "Video",
+          "title": "How to speak so that people want to listen (Julian Treasure, TED)",
+          "url": "https://www.youtube.com/watch?v=eIho2S0ZahI"
+        },
+        {
+          "kind": "Article",
+          "title": "What is emotional intelligence? (Greater Good Science Center, UC Berkeley)",
+          "url": "https://greatergood.berkeley.edu/topic/emotional_intelligence/definition"
+        },
+        {
+          "kind": "Article",
+          "title": "High-performing teams need psychological safety (Harvard Business Review)",
+          "url": "https://hbr.org/2017/08/high-performing-teams-need-psychological-safety-heres-how-to-create-it"
+        }
+      ],
       "position": 3,
       "pdfChunks": 0
     },
@@ -200,7 +273,24 @@
       "quiz": [],
       "status": "Published",
       "passMark": 60,
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=LhoLuui9gX8",
+      "resources": [
+        {
+          "kind": "Video",
+          "title": "Building a psychologically safe workplace (Amy Edmondson, TEDxHGSE)",
+          "url": "https://www.youtube.com/watch?v=LhoLuui9gX8"
+        },
+        {
+          "kind": "Guide",
+          "title": "Understanding team effectiveness: Google's Project Aristotle (re:Work)",
+          "url": "https://rework.withgoogle.com/intl/en/guides/understanding-team-effectiveness"
+        },
+        {
+          "kind": "Article",
+          "title": "High-performing teams need psychological safety (Harvard Business Review)",
+          "url": "https://hbr.org/2017/08/high-performing-teams-need-psychological-safety-heres-how-to-create-it"
+        }
+      ],
       "position": 4,
       "pdfChunks": 0
     },
@@ -225,7 +315,29 @@
       "quiz": [],
       "status": "Published",
       "passMark": 60,
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=RcGyVTAoXEU",
+      "resources": [
+        {
+          "kind": "Video",
+          "title": "How to make stress your friend (Kelly McGonigal, TED)",
+          "url": "https://www.youtube.com/watch?v=RcGyVTAoXEU"
+        },
+        {
+          "kind": "Fact sheet",
+          "title": "Mental health at work (World Health Organization)",
+          "url": "https://www.who.int/news-room/fact-sheets/detail/mental-health-at-work"
+        },
+        {
+          "kind": "Guide",
+          "title": "Coping with stress at work (American Psychological Association)",
+          "url": "https://www.apa.org/topics/healthy-workplaces/work-stress"
+        },
+        {
+          "kind": "Guide",
+          "title": "Healthy ways to handle stress (APA)",
+          "url": "https://www.apa.org/topics/stress/tips"
+        }
+      ],
       "position": 5,
       "pdfChunks": 0
     },
@@ -250,7 +362,24 @@
       "quiz": [],
       "status": "Published",
       "passMark": 60,
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=iCvmsMzlF7o",
+      "resources": [
+        {
+          "kind": "Video",
+          "title": "The power of vulnerability (Brene Brown, TED)",
+          "url": "https://www.youtube.com/watch?v=iCvmsMzlF7o"
+        },
+        {
+          "kind": "Guide",
+          "title": "Building your resilience (American Psychological Association)",
+          "url": "https://www.apa.org/topics/resilience/building-your-resilience"
+        },
+        {
+          "kind": "Article",
+          "title": "What is gratitude? (Greater Good Science Center, UC Berkeley)",
+          "url": "https://greatergood.berkeley.edu/topic/gratitude/definition"
+        }
+      ],
       "position": 6,
       "pdfChunks": 0
     },
@@ -277,7 +406,24 @@
       "quiz": [],
       "status": "Published",
       "passMark": 60,
-      "videoUrl": null,
+      "videoUrl": "https://www.youtube.com/watch?v=rrkrvAUbU9Y",
+      "resources": [
+        {
+          "kind": "Video",
+          "title": "The puzzle of motivation (Dan Pink, TED)",
+          "url": "https://www.youtube.com/watch?v=rrkrvAUbU9Y"
+        },
+        {
+          "kind": "Article",
+          "title": "Leading change: why transformation efforts fail (John Kotter, HBR)",
+          "url": "https://hbr.org/2007/01/leading-change-why-transformation-efforts-fail"
+        },
+        {
+          "kind": "Guide",
+          "title": "Understanding team effectiveness: Google's Project Aristotle (re:Work)",
+          "url": "https://rework.withgoogle.com/intl/en/guides/understanding-team-effectiveness"
+        }
+      ],
       "position": 7,
       "pdfChunks": 0
     }

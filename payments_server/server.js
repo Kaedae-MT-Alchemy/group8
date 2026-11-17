@@ -1,5 +1,6 @@
 // MT Alchemy payment server: keeps the Stripe secret key off the web app.
-// Run: node --env-file=.env server.js
+// Local: npm start (reads .env). Hosted (Render etc.): npm run serve, with
+// STRIPE_SECRET_KEY and ALLOWED_ORIGINS set as environment variables.
 const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
@@ -66,6 +67,34 @@ app.get('/api/checkout-session/:id', async (req, res) => {
     });
   } catch (e) {
     res.status(404).json({ error: 'Session not found' });
+  }
+});
+
+// Lets admin check an order with Stripe directly (for example when the
+// customer closed the tab before returning to the site).
+app.get('/api/order-payment/:orderNumber', async (req, res) => {
+  const orderNumber = req.params.orderNumber;
+  if (!/^[A-Za-z0-9-]{4,40}$/.test(orderNumber)) return res.status(400).json({ error: 'Invalid order number' });
+  try {
+    const sessions = await stripe.checkout.sessions.list({ limit: 100 });
+    const matches = sessions.data.filter((s) => s.metadata && s.metadata.orderNumber === orderNumber);
+    const paid = matches.find((s) => s.payment_status === 'paid');
+    const latest = paid || matches[0];
+    if (!latest) return res.json({ orderNumber, found: false });
+    res.json({
+      orderNumber,
+      found: true,
+      sessionId: latest.id,
+      paymentStatus: latest.payment_status,
+      status: latest.status,
+      amountTotal: latest.amount_total / 100,
+      currency: latest.currency,
+      paymentIntent: latest.payment_intent,
+      created: new Date(latest.created * 1000).toISOString(),
+    });
+  } catch (e) {
+    console.error('order-payment', e.message);
+    res.status(502).json({ error: 'Stripe lookup failed' });
   }
 });
 

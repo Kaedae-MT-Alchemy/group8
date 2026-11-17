@@ -179,6 +179,7 @@ erDiagram
 | Product, Product category | `products/{id}` (`category`) | Digital or Physical. |
 | Cart | Browser storage (`alchemy_cart_v2`) | Guest carts work before sign-in. |
 | Order, Order item, Payment, Shipping, Digital download | `orders/{number}` with embedded `lines`, payment and shipping fields | Digital download entitlement = paid order line. Course purchases are lines with category `Course`. |
+| Bank transfer receipt | `paymentProofs/{number}` | One receipt image + bank reference per bank-transfer order; order keeps `proofStatus` (Submitted, Verified, Rejected, Expired). |
 | Quote | `quotes/{reference}` | Owner + admin only. |
 | Notification | `notifications/{id}` | Sent by admin/trainer/employer; read by recipient. |
 | Contact enquiry | `enquiries/{reference}` | Public create, admin read. |

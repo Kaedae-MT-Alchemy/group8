@@ -24,6 +24,10 @@ class Course {
 
   /// Optional lesson video (YouTube or MP4 link) shown in the course player.
   final String? videoUrl;
+
+  /// Extra learning material: videos, articles and guides, each a map with
+  /// `kind`, `title` and `url`.
+  final List<Map<String, String>> resources;
   bool get isPublished => status == 'Published';
   String get imageAsset =>
       'assets/images/${switch (id) {
@@ -53,6 +57,7 @@ class Course {
     this.status = 'Published',
     this.passMark = 60,
     this.videoUrl,
+    this.resources = const [],
   });
 }
 
@@ -81,6 +86,33 @@ const List<Course> seedCourses = [
       'Empathy and Social Awareness',
       'Building Better Relationships',
     ],
+    videoUrl: 'https://www.youtube.com/watch?v=D6_J7FfgWVc',
+    resources: [
+      {
+        'kind': 'Video',
+        'title':
+            '6 Steps to Improve Your Emotional Intelligence (Ramona Hacker, TEDxTUM)',
+        'url': 'https://www.youtube.com/watch?v=D6_J7FfgWVc',
+      },
+      {
+        'kind': 'Video',
+        'title': 'Daniel Goleman introduces Emotional Intelligence (Big Think)',
+        'url': 'https://www.youtube.com/watch?v=Y7m9eNoB3NU',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'What is emotional intelligence? (Greater Good Science Center, UC Berkeley)',
+        'url':
+            'https://greatergood.berkeley.edu/topic/emotional_intelligence/definition',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'What Makes a Leader? by Daniel Goleman (Harvard Business Review)',
+        'url': 'https://hbr.org/2004/01/what-makes-a-leader',
+      },
+    ],
   ),
   Course(
     id: 'mindfulness',
@@ -98,6 +130,26 @@ const List<Course> seedCourses = [
       'Managing Workplace Stress',
       'Mindful Communication',
       'Building a Daily Practice',
+    ],
+    videoUrl: 'https://www.youtube.com/watch?v=qzR62JJCMBQ',
+    resources: [
+      {
+        'kind': 'Video',
+        'title': 'All it takes is 10 mindful minutes (Andy Puddicombe, TED)',
+        'url': 'https://www.youtube.com/watch?v=qzR62JJCMBQ',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'What is mindfulness? (Greater Good Science Center, UC Berkeley)',
+        'url': 'https://greatergood.berkeley.edu/topic/mindfulness/definition',
+      },
+      {
+        'kind': 'Guide',
+        'title': 'Mindfulness: how it helps and how to practise it (NHS)',
+        'url':
+            'https://www.nhs.uk/mental-health/self-help/tips-and-support/mindfulness/',
+      },
     ],
   ),
   Course(
@@ -118,6 +170,27 @@ const List<Course> seedCourses = [
       'Decision-Making',
       'Creating High-Performing Teams',
     ],
+    videoUrl: 'https://www.youtube.com/watch?v=qp0HIF3SfI4',
+    resources: [
+      {
+        'kind': 'Video',
+        'title': 'How great leaders inspire action (Simon Sinek, TED)',
+        'url': 'https://www.youtube.com/watch?v=qp0HIF3SfI4',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'What Makes a Leader? by Daniel Goleman (Harvard Business Review)',
+        'url': 'https://hbr.org/2004/01/what-makes-a-leader',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'Leading change: why transformation efforts fail (John Kotter, HBR)',
+        'url':
+            'https://hbr.org/2007/01/leading-change-why-transformation-efforts-fail',
+      },
+    ],
   ),
   Course(
     id: 'communication',
@@ -135,6 +208,29 @@ const List<Course> seedCourses = [
       'Clear and Confident Speaking',
       'Difficult Conversations',
       'Professional Communication',
+    ],
+    videoUrl: 'https://www.youtube.com/watch?v=eIho2S0ZahI',
+    resources: [
+      {
+        'kind': 'Video',
+        'title':
+            'How to speak so that people want to listen (Julian Treasure, TED)',
+        'url': 'https://www.youtube.com/watch?v=eIho2S0ZahI',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'What is emotional intelligence? (Greater Good Science Center, UC Berkeley)',
+        'url':
+            'https://greatergood.berkeley.edu/topic/emotional_intelligence/definition',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'High-performing teams need psychological safety (Harvard Business Review)',
+        'url':
+            'https://hbr.org/2017/08/high-performing-teams-need-psychological-safety-heres-how-to-create-it',
+      },
     ],
   ),
   Course(
@@ -154,6 +250,29 @@ const List<Course> seedCourses = [
       'Managing Team Conflict',
       'High-Performance Teams',
     ],
+    videoUrl: 'https://www.youtube.com/watch?v=LhoLuui9gX8',
+    resources: [
+      {
+        'kind': 'Video',
+        'title':
+            'Building a psychologically safe workplace (Amy Edmondson, TEDxHGSE)',
+        'url': 'https://www.youtube.com/watch?v=LhoLuui9gX8',
+      },
+      {
+        'kind': 'Guide',
+        'title':
+            'Understanding team effectiveness: Google\'s Project Aristotle (re:Work)',
+        'url':
+            'https://rework.withgoogle.com/intl/en/guides/understanding-team-effectiveness',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'High-performing teams need psychological safety (Harvard Business Review)',
+        'url':
+            'https://hbr.org/2017/08/high-performing-teams-need-psychological-safety-heres-how-to-create-it',
+      },
+    ],
   ),
   Course(
     id: 'workplace-wellbeing',
@@ -172,6 +291,31 @@ const List<Course> seedCourses = [
       'Resilience at Work',
       'Creating a Well-being Culture',
     ],
+    videoUrl: 'https://www.youtube.com/watch?v=RcGyVTAoXEU',
+    resources: [
+      {
+        'kind': 'Video',
+        'title': 'How to make stress your friend (Kelly McGonigal, TED)',
+        'url': 'https://www.youtube.com/watch?v=RcGyVTAoXEU',
+      },
+      {
+        'kind': 'Fact sheet',
+        'title': 'Mental health at work (World Health Organization)',
+        'url':
+            'https://www.who.int/news-room/fact-sheets/detail/mental-health-at-work',
+      },
+      {
+        'kind': 'Guide',
+        'title':
+            'Coping with stress at work (American Psychological Association)',
+        'url': 'https://www.apa.org/topics/healthy-workplaces/work-stress',
+      },
+      {
+        'kind': 'Guide',
+        'title': 'Healthy ways to handle stress (APA)',
+        'url': 'https://www.apa.org/topics/stress/tips',
+      },
+    ],
   ),
   Course(
     id: 'personal-development',
@@ -189,6 +333,26 @@ const List<Course> seedCourses = [
       'Building Positive Habits',
       'Confidence and Growth',
       'Continuous Improvement',
+    ],
+    videoUrl: 'https://www.youtube.com/watch?v=iCvmsMzlF7o',
+    resources: [
+      {
+        'kind': 'Video',
+        'title': 'The power of vulnerability (Brene Brown, TED)',
+        'url': 'https://www.youtube.com/watch?v=iCvmsMzlF7o',
+      },
+      {
+        'kind': 'Guide',
+        'title':
+            'Building your resilience (American Psychological Association)',
+        'url': 'https://www.apa.org/topics/resilience/building-your-resilience',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'What is gratitude? (Greater Good Science Center, UC Berkeley)',
+        'url': 'https://greatergood.berkeley.edu/topic/gratitude/definition',
+      },
     ],
   ),
   Course(
@@ -209,6 +373,28 @@ const List<Course> seedCourses = [
       'People and Performance',
       'Building Sustainable Organisations',
     ],
+    videoUrl: 'https://www.youtube.com/watch?v=rrkrvAUbU9Y',
+    resources: [
+      {
+        'kind': 'Video',
+        'title': 'The puzzle of motivation (Dan Pink, TED)',
+        'url': 'https://www.youtube.com/watch?v=rrkrvAUbU9Y',
+      },
+      {
+        'kind': 'Article',
+        'title':
+            'Leading change: why transformation efforts fail (John Kotter, HBR)',
+        'url':
+            'https://hbr.org/2007/01/leading-change-why-transformation-efforts-fail',
+      },
+      {
+        'kind': 'Guide',
+        'title':
+            'Understanding team effectiveness: Google\'s Project Aristotle (re:Work)',
+        'url':
+            'https://rework.withgoogle.com/intl/en/guides/understanding-team-effectiveness',
+      },
+    ],
   ),
 ];
 
@@ -228,6 +414,7 @@ Map<String, dynamic> courseToJson(Course c) => {
   'status': c.status,
   'passMark': c.passMark,
   'videoUrl': c.videoUrl,
+  'resources': c.resources,
 };
 
 Course courseFromJson(Map<String, dynamic> c, {String? pdfBase64}) => Course(
@@ -246,6 +433,12 @@ Course courseFromJson(Map<String, dynamic> c, {String? pdfBase64}) => Course(
   status: c['status'] as String? ?? 'Published',
   passMark: (c['passMark'] as num?)?.toInt() ?? 60,
   videoUrl: c['videoUrl'] as String?,
+  resources: [
+    for (final r in c['resources'] as List? ?? [])
+      Map<String, String>.from(
+        (r as Map).map((k, v) => MapEntry('$k', '${v ?? ''}')),
+      ),
+  ],
   quiz: [
     for (final q in c['quiz'] as List? ?? [])
       Map<String, dynamic>.from(q as Map),

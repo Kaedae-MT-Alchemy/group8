@@ -37,7 +37,13 @@ class _LearnerDashboardScreenState extends State<LearnerDashboardScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    // Name and profile edits (on any device) show up immediately.
+    listenable: AuthPrototypeStore.instance,
+    builder: (context, _) => _dashboard(context),
+  );
+
+  Widget _dashboard(BuildContext context) {
     final mine = mockCourses
         .where((c) => enrolledCourses.contains(c.id))
         .toList();

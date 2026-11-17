@@ -1,6 +1,6 @@
 import '../../shared/learning_navigation.dart';
 import '../../shared/file_export.dart';
-import '../../shared/report_document.dart';
+import '../../shared/certificate_pdf.dart';
 import '../../shared/auth_prototype_store.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -162,7 +162,7 @@ class CertificateScreen extends StatelessWidget {
                         const Text('This is to certify that'),
                         const SizedBox(height: 10),
                         Text(
-                          AuthPrototypeStore.instance.displayName ?? 'Learner',
+                          learnerName,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 30,
@@ -254,16 +254,15 @@ class CertificateScreen extends StatelessWidget {
                         try {
                           final destination = await saveLocalFile(
                             'certificate-${course.id}.pdf',
-                            createReportPdf([
-                              'MT Alchemy - Certificate of Completion',
-                              'Awarded to: ${AuthPrototypeStore.instance.displayName ?? "Learner"}',
-                              'Course: ${course.title}',
-                              'Assessment: Passed',
-                              'Completed: $date',
-                              'Trainer: ${course.instructor}',
-                              'Certificate ID: $certId',
-                              'Verify at: $verifyUrl',
-                            ]),
+                            await buildCertificatePdf(
+                              learnerName: learnerName,
+                              courseTitle: course.title,
+                              date: date,
+                              certificateId: certId,
+                              trainer: course.instructor,
+                              verifyUrl: verifyUrl,
+                              score: score,
+                            ),
                           );
                           if (context.mounted) {
                             _mock(

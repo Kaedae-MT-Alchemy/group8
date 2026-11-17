@@ -230,7 +230,20 @@ npm start                   # http://localhost:4242
 
 During checkout choose **Card → Continue to Stripe**, pay with test card `4242 4242 4242 4242` (any future expiry and CVC), and you return to a confirmation page. The app confirms the payment with Stripe through the server before the order is marked **Paid**. A cancelled payment keeps the order **Pending** with a "Try payment again" button. FPX and bank transfer are also offered.
 
-> For production: use live keys, host `payments_server` (for example on Cloud Run or Render), add the site to `ALLOWED_ORIGINS`, and confirm payments with a Stripe webhook.
+Admins can press **Check payment with Stripe** on any unpaid card order to look it up in Stripe and mark it paid (useful when a customer closed the tab before returning).
+
+**Stripe on the public site.** GitHub Pages only serves static files, so the payment server must be hosted separately. The repository includes a [`render.yaml`](render.yaml) blueprint for Render's free plan; see [SETUP.md section 4.1](SETUP.md#41-host-the-payment-server-for-the-public-site). Until `PAYMENTS_API_URL` is set, the live site uses the built-in test gateway and payments do not appear in the Stripe dashboard.
+
+### Bank transfer (manual payment)
+
+Bank transfer works the way online stores run manual payments (for example WooCommerce "on hold" orders and Shopify "manual payment" orders):
+
+1. The customer chooses **Bank transfer**. The order is created as **Pending**, stock is held, and the order page shows the company bank account, the amount, the reference to quote (the order number) and a due date 3 days later.
+2. After paying, the customer enters the bank reference and uploads a photo or screenshot of the receipt. The order shows **Receipt submitted, awaiting verification**.
+3. In **Admin → Orders → Receipts to verify**, finance opens the receipt, checks the money on the bank statement, then either **Confirms payment received** (order becomes **Paid** and moves to fulfilment) or **Rejects the receipt** with a reason (the customer is notified and can upload again).
+4. Orders with no receipt after 3 days are cancelled automatically and their stock is released.
+
+Every step is saved in Firestore (`orders`, `paymentProofs`, `notifications`) and updates live for both sides.
 
 ## AI assistant
 
@@ -246,6 +259,7 @@ The **Alchemy Assistant** appears on every page. It is grounded on MT Alchemy's 
 | `products` | Store catalogue and stock | Public read; admin write |
 | `courses`, `courseFiles` | Courses, quizzes, PDFs | Public read; admin and trainer write |
 | `orders` | Orders, payments, shipping | Owner and admin |
+| `paymentProofs` | Bank transfer receipts (one per order) | Owner uploads; owner and admin read |
 | `progress`, `quizAttempts`, `certificates` | Learning records | Learner; trainers and admins read; certificates publicly verifiable |
 | `employees`, `assignments` | Employer organization data | Owning employer and admin |
 | `quotes`, `enquiries`, `notifications` | Requests and messages | Owner, recipient or admin |

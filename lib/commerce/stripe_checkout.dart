@@ -17,6 +17,9 @@ import 'commerce_prototype_store.dart';
 class StripeCheckout {
   static http.Client client = http.Client();
 
+  // A free hosted server can take up to a minute to wake up.
+  static const _wait = Duration(seconds: 70);
+
   static bool get enabled => AppConfig.paymentsApiUrl.isNotEmpty;
 
   static Uri _api(String path) => Uri.parse('${AppConfig.paymentsApiUrl}$path');
@@ -46,7 +49,7 @@ class StripeCheckout {
             ],
           }),
         )
-        .timeout(const Duration(seconds: 20));
+        .timeout(_wait);
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode != 200 || data['url'] == null) {
       throw StateError(data['error'] as String? ?? 'Checkout unavailable');
@@ -58,8 +61,17 @@ class StripeCheckout {
   static Future<Map<String, dynamic>> verify(String sessionId) async {
     final response = await client
         .get(_api('/api/checkout-session/${Uri.encodeComponent(sessionId)}'))
-        .timeout(const Duration(seconds: 20));
+        .timeout(_wait);
     if (response.statusCode != 200) throw StateError('Session not found');
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  /// Looks the order up in Stripe (admin reconciliation).
+  static Future<Map<String, dynamic>> lookupOrder(String orderNumber) async {
+    final response = await client
+        .get(_api('/api/order-payment/${Uri.encodeComponent(orderNumber)}'))
+        .timeout(_wait);
+    if (response.statusCode != 200) throw StateError('Stripe lookup failed');
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
 

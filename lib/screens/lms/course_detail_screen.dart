@@ -1,6 +1,7 @@
 import '../../shared/learning_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../widgets.dart';
+import '../../widgets/lms/course_media.dart';
 
 import '../../data/mock_data.dart';
 import '../../data/progress_store.dart';
@@ -207,6 +208,23 @@ class CourseDetailScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+
+                if (course.videoUrl != null || course.resources.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  _sectionCard(
+                    context,
+                    title: 'Preview and resources',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (course.videoUrl != null)
+                          CourseVideo(url: course.videoUrl!),
+                        const SizedBox(height: 8),
+                        CourseResources(course: course),
+                      ],
+                    ),
+                  ),
+                ],
 
                 const SizedBox(height: 28),
 

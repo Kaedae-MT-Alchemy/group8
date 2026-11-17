@@ -133,7 +133,19 @@ The Stripe **secret key must never be in the Flutter app or in Git.** It lives o
    ```
 6. Test with card `4242 4242 4242 4242`, any future expiry date and any CVC.
 
-For the public site, host `payments_server` somewhere reachable (for example Render, Railway or Google Cloud Run), set `STRIPE_SECRET_KEY` and `ALLOWED_ORIGINS` in that host's environment settings, and use its URL as `PAYMENTS_API_URL`. Leave `PAYMENTS_API_URL` empty to use the built-in test gateway instead.
+Leave `PAYMENTS_API_URL` empty to use the built-in test gateway instead (payments then do not appear in Stripe).
+
+### 4.1 Host the payment server for the public site
+
+GitHub Pages cannot run the server, and Firebase Functions / Cloud Run need a billing account, so the repository ships a free [Render](https://render.com) blueprint ([`render.yaml`](render.yaml)):
+
+1. Sign in to Render with GitHub and choose **New → Blueprint**, then pick this repository.
+2. When Render asks for `STRIPE_SECRET_KEY`, paste your `sk_test_...` key. `ALLOWED_ORIGINS` is already set to `https://sayyadsuzain9001.github.io` (change it in `render.yaml` if your GitHub username differs).
+3. Wait for the deploy, then open `https://<service-name>.onrender.com/api/health`. It should return `{"ok":true,"mode":"test"}`.
+4. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**, name `PAYMENTS_API_URL`, value `https://<service-name>.onrender.com` (no trailing slash).
+5. Re-run the **Deploy to GitHub Pages** workflow. Card payments from every user now go through Stripe and appear under **Stripe Dashboard → Payments** (test mode).
+
+Free Render services sleep after 15 minutes without traffic; the first payment after a pause can take up to a minute while it wakes up (the app waits up to 70 seconds).
 
 **If a secret key is ever shared** (chat, email, screenshot), roll it in Stripe: Developers → API keys → **Roll key**.
 

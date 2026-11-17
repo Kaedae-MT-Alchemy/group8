@@ -5,9 +5,12 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../commerce/bank_transfer_widgets.dart';
 import '../commerce/commerce_prototype_store.dart';
+import '../commerce/stripe_checkout.dart';
 import '../shared/portal_components.dart';
 import '../theme.dart';
+import '../shared/image_compress.dart';
 import '../shared/charts.dart';
 import '../shared/ui_kit.dart';
 import '../widgets.dart';
@@ -547,10 +550,10 @@ class _ProductEditorDialogState extends State<_ProductEditorDialog> {
     );
     if (result == null || result.files.isEmpty) return;
     final file = result.files.single;
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 25 * 1024 * 1024) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Choose an image smaller than 10 MB.')),
+          const SnackBar(content: Text('Choose an image smaller than 25 MB.')),
         );
       }
       return;
@@ -565,8 +568,23 @@ class _ProductEditorDialogState extends State<_ProductEditorDialog> {
       }
       return;
     }
+    // Resize and convert to JPEG so the product record stays under
+    // Firestore's 1 MB limit (phone photos are often 3-8 MB).
+    final compressed = compressImage(file.bytes!);
+    if (compressed == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'That file is not a supported image (use JPG, PNG or WebP).',
+            ),
+          ),
+        );
+      }
+      return;
+    }
     setState(() {
-      selectedImageBytes = file.bytes;
+      selectedImageBytes = compressed;
       selectedImage = null;
     });
   }
@@ -916,139 +934,274 @@ Future<void> _deleteProduct(BuildContext context, ShopProduct product) async {
   if (confirmed == true) _store.deleteProduct(product.id);
 }
 
-class OrderManagementPage extends StatelessWidget {
+class OrderManagementPage extends StatefulWidget {
   const OrderManagementPage({super.key});
+  @override
+  State<OrderManagementPage> createState() => _OrderManagementPageState();
+}
+
+class _OrderManagementPageState extends State<OrderManagementPage> {
+  static const _filters = {
+    'All': 'All orders',
+    'Verify': 'Receipts to verify',
+    'Transfer': 'Awaiting transfer',
+    'Paid': 'Paid',
+    'Failed': 'Failed / cancelled',
+  };
+  String _filter = 'All';
+
+  @override
+  void initState() {
+    super.initState();
+    // Like a store's "cancel unpaid orders" job: release stock held by
+    // bank transfers that were never paid.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sweep());
+    _store.addListener(_sweep);
+  }
+
+  @override
+  void dispose() {
+    _store.removeListener(_sweep);
+    super.dispose();
+  }
+
+  void _sweep() {
+    if (!mounted || !_store.orders.any((o) => o.transferOverdue)) return;
+    final cancelled = _store.cancelOverdueTransfers();
+    if (cancelled > 0 && mounted) {
+      final noun = cancelled == 1 ? 'order was' : 'orders were';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '$cancelled unpaid bank transfer $noun cancelled after 3 days and the stock released.',
+          ),
+        ),
+      );
+    }
+  }
+
+  static bool _inView(String filter, ShopOrder o) => switch (filter) {
+    'Verify' => o.awaitingTransfer && o.proofStatus == 'Submitted',
+    'Transfer' => o.awaitingTransfer && o.proofStatus != 'Submitted',
+    'Paid' => o.paymentStatus == 'Paid',
+    'Failed' => o.paymentStatus == 'Failed',
+    _ => true,
+  };
+
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: _store,
-    builder: (context, _) => PortalPage(
-      title: 'Prepare each order for the customer.',
-      eyebrow: 'Admin · order management',
-      children: [
-        const InfoCard(
-          color: Color(0xFFFFF8DE),
-          child: Text(
-            'Order lifecycle: Pending → Paid → Processing → Shipped → Delivered. Digital items become available after payment confirmation.',
-            style: TextStyle(height: 1.5),
-          ),
-        ),
-        const SizedBox(height: 18),
-        if (_store.orders.isEmpty)
+    builder: (context, _) {
+      final visible = _store.orders.where((o) => _inView(_filter, o)).toList();
+      return PortalPage(
+        title: 'Prepare each order for the customer.',
+        eyebrow: 'Admin · order management',
+        children: [
           const InfoCard(
+            color: Color(0xFFFFF8DE),
             child: Text(
-              'No customer orders yet. New orders appear here as soon as customers check out.',
+              'Order lifecycle: Pending → Paid → Processing → Shipped → Delivered. Card and FPX payments are confirmed by the gateway. Bank transfers stay Pending until you find the money on the bank statement and confirm it; unpaid transfers are cancelled after 3 days and their stock released.',
+              style: TextStyle(height: 1.5),
             ),
-          )
-        else
-          for (final order in _store.orders)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: InfoCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      alignment: WrapAlignment.spaceBetween,
-                      spacing: 12,
-                      runSpacing: 4,
-                      children: [
-                        Text(
-                          order.number,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        Text(
-                          money(order.total),
-                          style: const TextStyle(fontWeight: FontWeight.w900),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '${order.customerName} · ${order.date.day}/${order.date.month}/${order.date.year}',
-                    ),
-                    if (order.customerEmail.isNotEmpty)
-                      Text('${order.customerEmail} · ${order.customerPhone}'),
-                    if (order.billingAddress != null)
-                      Text('Bill to: ${order.billingAddress}'),
-                    if (order.shippingAddress != null)
-                      Text('Ship to: ${order.shippingAddress}'),
-                    if (order.trackingNumber != null)
-                      SelectableText('Tracking: ${order.trackingNumber}'),
-                    const SizedBox(height: 8),
-                    for (final line in order.lines)
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final e in _filters.entries)
+                ChoiceChip(
+                  label: Text(
+                    '${e.value} (${_store.orders.where((o) => _inView(e.key, o)).length})',
+                  ),
+                  selected: _filter == e.key,
+                  onSelected: (_) => setState(() => _filter = e.key),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (visible.isEmpty)
+            InfoCard(
+              child: Text(
+                _store.orders.isEmpty
+                    ? 'No customer orders yet. New orders appear here as soon as customers check out.'
+                    : 'No orders in this view.',
+              ),
+            )
+          else
+            for (final order in visible)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: InfoCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        spacing: 12,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            order.number,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          Text(
+                            money(order.total),
+                            style: const TextStyle(fontWeight: FontWeight.w900),
+                          ),
+                        ],
+                      ),
                       Text(
-                        '${line.product.name} × ${line.quantity} (${line.product.digital ? 'Digital' : 'Physical'})',
+                        '${order.customerName} · ${order.date.day}/${order.date.month}/${order.date.year}',
                       ),
-                    const SizedBox(height: 10),
-                    DropdownButtonFormField<String>(
-                      key: ValueKey(
-                        'payment-${order.number}-${order.paymentStatus}',
-                      ),
-                      initialValue: order.paymentStatus,
-                      decoration: const InputDecoration(
-                        labelText: 'Payment status',
-                      ),
-                      items: _paymentOptions(order)
-                          .map(
-                            (value) => DropdownMenuItem(
-                              value: value,
-                              child: Text(value),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null &&
-                            _store.updatePaymentStatus(order.number, value)) {
-                          NotificationService.send(
-                            recipient: order.customerEmail,
-                            title: 'Payment $value',
-                            body:
-                                'Order ${order.number} payment is now $value.',
-                            route: '/orders',
-                          );
-                        } else if (value != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Payment status was not changed. Check available stock or order state.',
+                      if (order.customerEmail.isNotEmpty)
+                        Text('${order.customerEmail} · ${order.customerPhone}'),
+                      if (order.billingAddress != null)
+                        Text('Bill to: ${order.billingAddress}'),
+                      if (order.shippingAddress != null)
+                        Text('Ship to: ${order.shippingAddress}'),
+                      if (order.trackingNumber != null)
+                        SelectableText('Tracking: ${order.trackingNumber}'),
+                      const SizedBox(height: 8),
+                      for (final line in order.lines)
+                        Text(
+                          '${line.product.name} × ${line.quantity} (${line.product.digital ? 'Digital' : 'Physical'})',
+                        ),
+                      if (order.isBankTransfer)
+                        TransferReviewPanel(order: order),
+                      if (StripeCheckout.enabled &&
+                          !order.isBankTransfer &&
+                          order.paymentStatus != 'Paid')
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () => _checkStripe(context, order),
+                            icon: const Icon(Icons.sync_outlined),
+                            label: const Text('Check payment with Stripe'),
+                          ),
+                        ),
+                      const SizedBox(height: 10),
+                      if (!order.awaitingTransfer)
+                        DropdownButtonFormField<String>(
+                          key: ValueKey(
+                            'payment-${order.number}-${order.paymentStatus}',
+                          ),
+                          initialValue: order.paymentStatus,
+                          decoration: const InputDecoration(
+                            labelText: 'Payment status',
+                          ),
+                          items: _paymentOptions(order)
+                              .map(
+                                (value) => DropdownMenuItem(
+                                  value: value,
+                                  child: Text(value),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null &&
+                                _store.updatePaymentStatus(
+                                  order.number,
+                                  value,
+                                )) {
+                              NotificationService.send(
+                                recipient: order.customerEmail,
+                                title: 'Payment $value',
+                                body:
+                                    'Order ${order.number} payment is now $value.',
+                                route: '/orders',
+                              );
+                            } else if (value != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Payment status was not changed. Check available stock or order state.',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      const SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        initialValue: order.fulfilmentStatus,
+                        decoration: const InputDecoration(
+                          labelText: 'Fulfilment status',
+                        ),
+                        items: _fulfilmentOptions(order)
+                            .map(
+                              (value) => DropdownMenuItem(
+                                value: value,
+                                child: Text(value),
                               ),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    DropdownButtonFormField<String>(
-                      initialValue: order.fulfilmentStatus,
-                      decoration: const InputDecoration(
-                        labelText: 'Fulfilment status',
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            _store.updateOrderStatus(order.number, value);
+                            NotificationService.send(
+                              recipient: order.customerEmail,
+                              title: 'Order $value',
+                              body: 'Order ${order.number} is now $value.',
+                              route: '/orders',
+                            );
+                          }
+                        },
                       ),
-                      items: _fulfilmentOptions(order)
-                          .map(
-                            (value) => DropdownMenuItem(
-                              value: value,
-                              child: Text(value),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          _store.updateOrderStatus(order.number, value);
-                          NotificationService.send(
-                            recipient: order.customerEmail,
-                            title: 'Order $value',
-                            body: 'Order ${order.number} is now $value.',
-                            route: '/orders',
-                          );
-                        }
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-      ],
-    ),
+        ],
+      );
+    },
   );
+}
+
+Future<void> _checkStripe(BuildContext context, ShopOrder order) async {
+  final messenger = ScaffoldMessenger.of(context);
+  messenger.showSnackBar(
+    const SnackBar(content: Text('Checking with Stripe...')),
+  );
+  try {
+    final r = await StripeCheckout.lookupOrder(order.number);
+    messenger.hideCurrentSnackBar();
+    if (r['found'] != true) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Stripe has no checkout for ${order.number}.')),
+      );
+    } else if (r['paymentStatus'] == 'paid') {
+      final ok = _store.updatePaymentStatus(order.number, 'Paid');
+      if (ok) {
+        NotificationService.send(
+          recipient: order.customerEmail,
+          title: 'Payment received for ${order.number}',
+          body: 'Stripe confirmed your card payment of ${money(order.total)}.',
+          route: '/orders',
+        );
+      }
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Stripe confirms RM ${r['amountTotal']} was paid. Order marked as Paid.',
+          ),
+        ),
+      );
+    } else {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Stripe checkout is ${r['status']} and ${r['paymentStatus']}. Nothing to change yet.',
+          ),
+        ),
+      );
+    }
+  } catch (_) {
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      const SnackBar(content: Text('The payment server could not be reached.')),
+    );
+  }
 }
 
 List<String> _paymentOptions(ShopOrder order) => switch (order.paymentStatus) {

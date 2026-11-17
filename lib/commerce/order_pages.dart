@@ -9,6 +9,7 @@ import '../shared/portal_components.dart';
 import '../shared/report_document.dart';
 import '../theme.dart';
 import '../widgets.dart';
+import 'bank_transfer_widgets.dart';
 import 'commerce_prototype_store.dart';
 import 'payment_gateway.dart';
 import 'stripe_checkout.dart';
@@ -545,7 +546,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     setState(() => _paying = false);
     if (payment == null) return;
     final redirect = payment.status == 'Redirect';
-    final paymentMethod = redirect
+    final paymentMethod = redirect || payment.method == 'Bank transfer'
         ? payment.method
         : '${payment.method} · ${payment.reference}';
     final order = _store.placeOrder(
@@ -561,13 +562,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 : '${_address.text.trim()}, ${_city.text.trim()}, ${_state.text.trim()} ${_postcode.text.trim()}, ${_country.text.trim()}'
           : '',
       paymentMethod: paymentMethod,
+      paymentReference: payment.reference,
     );
     if (order != null && redirect && mounted) {
       await StripeCheckout.payOrder(context, order);
       return;
     }
     if (order != null && mounted) {
-      if (payment.message != null) {
+      if (payment.message != null && !order.isBankTransfer) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(payment.message!)));
@@ -598,7 +600,12 @@ class OrderConfirmationPage extends StatelessWidget {
   final String? orderNumber;
   final bool confirmation;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _store,
+    builder: (context, _) => _page(context),
+  );
+
+  Widget _page(BuildContext context) {
     final currentEmail = AuthPrototypeStore.instance.email;
     final candidate = _store.orderByNumber(orderNumber);
     final order =
@@ -610,6 +617,8 @@ class OrderConfirmationPage extends StatelessWidget {
           ? 'Order details.'
           : order?.paymentStatus == 'Failed'
           ? 'Payment was not completed.'
+          : order != null && order.awaitingTransfer
+          ? 'Your order is reserved. Complete your bank transfer.'
           : 'Thank you for your order.',
       eyebrow: confirmation ? 'Order confirmation' : 'My Orders',
       children: [
@@ -643,7 +652,15 @@ class OrderConfirmationPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
               ],
-              if (order?.paymentStatus == 'Failed') ...[
+              if (order != null &&
+                  order.isBankTransfer &&
+                  (order.awaitingTransfer || order.proofStatus != null)) ...[
+                const SizedBox(height: 12),
+                BankTransferCard(order: order),
+                const SizedBox(height: 12),
+              ],
+              if (order?.paymentStatus == 'Failed' &&
+                  order?.proofStatus != 'Expired') ...[
                 const SizedBox(height: 8),
                 const Text(
                   'Your payment was declined, so nothing was charged and your cart has been kept.',
@@ -820,6 +837,23 @@ class MyOrdersPage extends StatelessWidget {
                       Text(
                         '${order.date.day}/${order.date.month}/${order.date.year} · ${order.paymentStatus} · ${order.fulfilmentStatus}',
                       ),
+                      if (order.isBankTransfer) ...[
+                        const SizedBox(height: 6),
+                        TransferStageChip(order: order),
+                        if (order.awaitingTransfer &&
+                            order.proofStatus != 'Submitted')
+                          TextButton.icon(
+                            onPressed: () => go(
+                              context,
+                              '/order-details',
+                              arguments: order.number,
+                            ),
+                            icon: const Icon(Icons.upload_file_outlined),
+                            label: const Text(
+                              'See bank details and upload receipt',
+                            ),
+                          ),
+                      ],
                       if (order.trackingNumber != null)
                         Text('Tracking: ${order.trackingNumber}'),
                       if (order.billingAddress != null)

@@ -2,9 +2,10 @@
   "name": "payments_server",
   "version": "1.0.0",
   "description": "Stripe Checkout server for MT Alchemy",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node --env-file=.env server.js"
+    "start": "node --env-file=.env server.js",
+    "serve": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +15,8 @@
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "stripe": "^17.7.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
