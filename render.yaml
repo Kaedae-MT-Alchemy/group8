@@ -1,0 +1,19 @@
+# Render blueprint for the Stripe payment server (free plan).
+# Render dashboard -> New -> Blueprint -> pick this repository.
+# Then set STRIPE_SECRET_KEY (sk_test_...) when Render asks for it, copy the
+# service URL (https://<name>.onrender.com) into the GitHub secret
+# PAYMENTS_API_URL and re-run the "Deploy to GitHub Pages" workflow.
+services:
+  - type: web
+    name: mt-alchemy-payments
+    runtime: node
+    plan: free
+    rootDir: payments_server
+    buildCommand: npm ci
+    startCommand: npm run serve
+    healthCheckPath: /api/health
+    envVars:
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://sayyadsuzain9001.github.io,http://localhost:8080
