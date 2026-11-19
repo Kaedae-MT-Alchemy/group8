@@ -5,7 +5,6 @@ import 'mock_data.dart';
 
 /// Learner progress for the signed-in account, stored in Firestore at
 /// `progress/{email}`. Screens read the in-memory collections below.
-const lessonsPerCourse = 20;
 final Map<String, Set<int>> completedLessons = {};
 final Map<String, int> lastLesson = {};
 final Set<String> completedCourses = {};
@@ -132,12 +131,15 @@ void completeCourse(String courseId, {int? score}) {
   saveProgress();
 }
 
-int progressFor(Course course) {
+int progressFor(Course course) =>
+    lessonPercent(course, completedLessons[course.id] ?? const {});
+
+/// Share of [course]'s lessons in [done] (lesson positions), 0 to 100.
+int lessonPercent(Course course, Iterable<int> done) {
   // A course with no modules yet (a new draft) has no progress to show.
   if (course.modules.isEmpty) return 0;
-  return ((completedLessons[course.id]?.length ?? 0) /
-          (course.modules.length * 4) *
-          100)
-      .round()
-      .clamp(0, 100);
+  final total = course.courseLessons.length;
+  if (total == 0) return 0;
+  final counted = done.where((i) => i >= 0 && i < total).toSet().length;
+  return (counted / total * 100).round().clamp(0, 100);
 }

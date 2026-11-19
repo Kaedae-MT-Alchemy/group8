@@ -36,6 +36,14 @@ flutter:
     - assets/images/
     - assets/images/stock/
     - assets/downloads/
+    - assets/materials/communication/
+    - assets/materials/ei-fundamentals/
+    - assets/materials/leadership/
+    - assets/materials/mindfulness/
+    - assets/materials/organisational-development/
+    - assets/materials/personal-development/
+    - assets/materials/team-effectiveness/
+    - assets/materials/workplace-wellbeing/
   fonts:
     - family: Lexend
       fonts:

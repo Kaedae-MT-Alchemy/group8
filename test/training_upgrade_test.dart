@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:publicwebsite/main.dart';
 import 'support/fake_backend.dart';
+import 'package:publicwebsite/data/course_content.dart';
 import 'package:publicwebsite/data/mock_data.dart';
 import 'package:publicwebsite/data/progress_store.dart';
 import 'package:publicwebsite/shared/auth_prototype_store.dart';
@@ -130,7 +131,12 @@ void main() {
     );
     expect(completedCourses, isEmpty);
   });
-  testWidgets('admin adds a course with custom assessment', (tester) async {
+  testWidgets('admin adds a course, then builds its lessons and quiz', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await auth.signIn('admin@mtalchemy.demo', 'AlchemyAdmin!26');
     await tester.pumpWidget(const MtAlchemyApp());
     tester
@@ -140,27 +146,75 @@ void main() {
     await tester.ensureVisible(find.text('Add course'));
     await tester.tap(find.text('Add course'));
     await tester.pumpAndSettle();
-    final fields = find.byType(TextFormField);
     for (final entry in [
       ('Course title', 'Safety training'),
       ('Description', 'Workplace skills'),
       ('Duration', '1 week'),
       ('Modules (one per line)', 'Getting started'),
       ('Price (RM)', '150'),
-      ('Quiz questions', 'Ask for help? | Yes | No | Yes'),
     ]) {
       final field = find.widgetWithText(TextFormField, entry.$1);
       await tester.ensureVisible(field);
       await tester.enterText(field, entry.$2);
     }
-    expect(fields, findsWidgets);
     await tester.tap(find.text('Save course'));
     await tester.pumpAndSettle();
-    expect(mockCourses.last.title, 'Safety training');
-    expect(mockCourses.last.quiz.single['answer'], 'Yes');
-    expect(mockCourses.last.status, 'Draft');
-    expect(mockCourses.last.price, 150);
+    final created = mockCourses.last;
+    expect(created.title, 'Safety training');
+    expect(created.status, 'Draft');
+    expect(created.price, 150);
     expect(publishedCourses.any((c) => c.title == 'Safety training'), isFalse);
+
+    // Open the builder for the new course.
+    final open = find.widgetWithText(FilledButton, 'Lessons & quiz').last;
+    await tester.ensureVisible(open);
+    await tester.tap(open);
+    await tester.pumpAndSettle();
+    expect(find.text('MODULE 1'), findsOneWidget);
+
+    // Add a link lesson.
+    await tester.tap(find.text('Add lesson to module 1'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Lesson title'),
+      'Safety guide',
+    );
+    await tester.tap(find.byType(DropdownButtonFormField<LessonKind>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Link').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Web address'),
+      'https://example.com/safety',
+    );
+    await tester.tap(find.text('Save lesson'));
+    await tester.pumpAndSettle();
+    expect(find.text('Safety guide'), findsOneWidget);
+
+    // Add a true/false question.
+    await tester.tap(find.textContaining('Quiz ('));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add question'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<QuizType>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('True or false').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Question'),
+      'Ask for help when unsure.',
+    );
+    await tester.tap(find.text('Save question'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save content'));
+    await tester.pumpAndSettle();
+
+    final saved = mockCourses.firstWhere((c) => c.id == created.id);
+    final lesson = saved.lessons.firstWhere((l) => l.title == 'Safety guide');
+    expect(lesson.kind, LessonKind.link);
+    expect(lesson.url, 'https://example.com/safety');
+    expect(saved.quizItems.single.type, QuizType.trueFalse);
+    expect(saved.quizItems.single.answers, ['True']);
     expect(tester.takeException(), isNull);
   });
 }

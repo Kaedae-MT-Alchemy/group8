@@ -1,3 +1,4 @@
+import '../../data/course_content.dart';
 import '../../data/mock_data.dart';
 import '../../shared/learning_navigation.dart';
 import 'package:flutter/material.dart';
@@ -120,19 +121,28 @@ class _QuizScreenState extends State<QuizScreen> {
       100;
   late final List<QuizQuestion> _questions = () {
     final course = mockCourses.firstWhere((c) => c.id == widget.courseId);
-    if (course.quiz.isNotEmpty) {
-      return course.quiz
-          .map(
-            (q) => QuizQuestion(
-              type: QuestionType.multipleChoice,
-              prompt: q['prompt'] as String,
-              options: List<String>.from(q['options']),
-              correct: [q['answer'] as String],
-              explanation:
-                  'Review the course material and the correct answer above.',
-            ),
-          )
-          .toList();
+    final items = course.quizItems;
+    if (items.isNotEmpty) {
+      return [
+        for (final q in items)
+          QuizQuestion(
+            type: switch (q.type) {
+              QuizType.single => QuestionType.multipleChoice,
+              QuizType.multi => QuestionType.multipleAnswer,
+              QuizType.trueFalse => QuestionType.trueFalse,
+              QuizType.short => QuestionType.shortAnswer,
+            },
+            prompt: q.prompt,
+            options: q.options,
+            correct: q.type == QuizType.short
+                ? [for (final a in q.answers) a.trim().toLowerCase()]
+                : q.answers,
+            displayAnswer: q.type == QuizType.short ? q.displayAnswer : null,
+            explanation: q.explanation.isEmpty
+                ? 'Review the lessons for this topic and try again.'
+                : q.explanation,
+          ),
+      ];
     }
     if (course.id == 'ei-fundamentals') return _sampleQuestions;
     return course.modules

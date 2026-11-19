@@ -98,7 +98,8 @@ void main() {
       expect(enrolledCourses, contains('mindfulness'));
       completedLessons['mindfulness'] = {0, 1};
       await saveProgress();
-      expect(store.assignments.single['progress'], 10);
+      // 2 of the course's 16 built-in lessons.
+      expect(store.assignments.single['progress'], 13);
       store.activeEmployer = 'employer@mtalchemy.demo';
       expect(
         store.employees.any((e) => e['email'] == 'new@example.test'),

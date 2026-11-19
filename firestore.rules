@@ -50,6 +50,16 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin() || isTrainer();
     }
+    // Lesson files uploaded in the course builder (PDF, slides, documents,
+    // short videos), stored as chunks because documents are capped at 1 MB.
+    match /lessonFiles/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin() || isTrainer();
+      match /chunks/{chunk} {
+        allow read: if signedIn();
+        allow write: if isAdmin() || isTrainer();
+      }
+    }
 
     match /orders/{id} {
       allow read: if isAdmin() || (signedIn() && resource.data.customerEmail == myEmail());

@@ -7,6 +7,7 @@ import '../cms/site_content.dart';
 import '../data/mock_data.dart';
 import '../shared/format.dart';
 import '../widgets.dart';
+import 'course_builder.dart';
 
 class CourseManagementPage extends StatefulWidget {
   const CourseManagementPage({super.key});
@@ -19,6 +20,15 @@ class _CourseManagementPageState extends State<CourseManagementPage> {
     await showDialog(
       context: context,
       builder: (_) => CourseEditor(course: course),
+    );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> openBuilder(Course course) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<bool>(
+        builder: (_) => CourseBuilderPage(courseId: course.id),
+      ),
     );
     if (mounted) setState(() {});
   }
@@ -120,15 +130,21 @@ class _CourseManagementPageState extends State<CourseManagementPage> {
                   Text(
                     '${plural(c.modules.length, 'module')} · ${c.duration} · ${c.level}',
                   ),
-                  Text(c.pdfName ?? 'No PDF attached'),
-                  Text('${c.quiz.length} custom quiz questions'),
+                  Text(
+                    '${plural(c.courseLessons.length, 'lesson')} · ${plural(c.quizItems.length, 'quiz question')}${c.lessons.isEmpty ? ' (built-in content)' : ''}',
+                  ),
                   Wrap(
                     spacing: 12,
                     children: [
+                      FilledButton.tonalIcon(
+                        onPressed: () => openBuilder(c),
+                        icon: const Icon(Icons.video_library_outlined),
+                        label: const Text('Lessons & quiz'),
+                      ),
                       TextButton.icon(
                         onPressed: () => edit(c),
                         icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Edit course'),
+                        label: const Text('Edit details'),
                       ),
                       TextButton.icon(
                         onPressed: () => remove(c),
@@ -165,14 +181,6 @@ class _CourseEditorState extends State<CourseEditor> {
   );
   late final modules = TextEditingController(
     text: widget.course?.modules.join('\n'),
-  );
-  late final quiz = TextEditingController(
-    text: widget.course?.quiz
-        .map(
-          (q) =>
-              '${q['prompt']} | ${(q['options'] as List).join(' | ')} | ${q['answer']}',
-        )
-        .join('\n'),
   );
   late final instructor = TextEditingController(
     text: widget.course?.instructor ?? 'MT Alchemy Learning Team',
@@ -218,7 +226,6 @@ class _CourseEditorState extends State<CourseEditor> {
       description,
       duration,
       modules,
-      quiz,
       instructor,
       price,
       passMark,
@@ -262,30 +269,6 @@ class _CourseEditorState extends State<CourseEditor> {
 
   Future<void> save() async {
     if (!form.currentState!.validate()) return;
-    final questions = <Map<String, dynamic>>[];
-    for (final line
-        in quiz.text.split('\n').where((l) => l.trim().isNotEmpty)) {
-      final parts = line.split('|').map((s) => s.trim()).toList();
-      if (parts.length != 4 ||
-          parts.any((p) => p.isEmpty) ||
-          !parts.sublist(1, 3).contains(parts.last) ||
-          parts[1] == parts[2]) {
-        setState(
-          () => error =
-              'Each quiz line needs: Question | Option A | Option B | Correct option (exact text).',
-        );
-        return;
-      }
-      questions.add({
-        'prompt': parts[0],
-        'options': parts.sublist(1, 3),
-        'answer': parts[3],
-      });
-    }
-    if (widget.course == null && questions.isEmpty) {
-      setState(() => error = 'Add at least one quiz question.');
-      return;
-    }
     final list = modules.text
         .split('\n')
         .map((s) => s.trim())
@@ -318,7 +301,8 @@ class _CourseEditorState extends State<CourseEditor> {
       prerequisites: prerequisites.toList(),
       pdfName: pdfName,
       pdfBase64: pdfData,
-      quiz: questions,
+      quiz: widget.course?.quiz ?? const [],
+      lessons: widget.course?.lessons ?? const [],
     );
     try {
       await saveCourseCatalogue([
@@ -360,7 +344,7 @@ class _CourseEditorState extends State<CourseEditor> {
                 (description, 'Description'),
                 (duration, 'Duration'),
                 (instructor, 'Instructor / trainer'),
-                (modules, 'Modules (one per line)'),
+                if (widget.course == null) (modules, 'Modules (one per line)'),
               ])
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -370,6 +354,14 @@ class _CourseEditorState extends State<CourseEditor> {
                     decoration: InputDecoration(labelText: field.$2),
                     validator: (v) =>
                         v == null || v.trim().isEmpty ? 'Required' : null,
+                  ),
+                ),
+              if (widget.course != null)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    'Modules, lessons, files and quiz questions are edited in "Lessons & quiz".',
+                    style: TextStyle(color: Colors.black54),
                   ),
                 ),
               Row(
@@ -555,16 +547,6 @@ class _CourseEditorState extends State<CourseEditor> {
                   ),
                 ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: quiz,
-                maxLines: 5,
-                decoration: const InputDecoration(
-                  labelText: 'Quiz questions',
-                  helperText:
-                      'One per line: Question | Option A | Option B | Correct option',
-                  helperMaxLines: 3,
-                ),
-              ),
               if (error != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),

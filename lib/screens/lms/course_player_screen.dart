@@ -4,37 +4,24 @@ import '../../shared/learning_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../widgets.dart';
 
+import '../../data/course_content.dart';
 import '../../data/mock_data.dart';
 import '../../data/progress_store.dart';
 import '../../theme.dart';
 import '../../widgets/lms/content_viewer.dart';
 import '../../widgets/lms/course_media.dart';
+import '../../widgets/lms/lesson_viewer.dart';
 import '../../widgets/lms/module_sidebar.dart';
 import '../../widgets/lms/progress_bar_card.dart';
 
-const _types = [
-  LessonType.video,
-  LessonType.text,
-  LessonType.pdf,
-  LessonType.presentation,
-  LessonType.audio,
-  LessonType.image,
-  LessonType.externalLink,
-];
-
-/// 5 modules x 4 lessons = 20 lessons, so 13 completed = 65%.
-List<PlayerLesson> _sampleLessons(List<String> titles) => [
-  for (var m = 0; m < titles.length; m++)
-    for (var l = 0; l < 4; l++)
-      PlayerLesson(
-        moduleIndex: m,
-        moduleTitle: titles[m],
-        title: 'Lesson ${m + 1}.${l + 1}',
-        type: _types[(m * 4 + l) % _types.length],
-        body:
-            '${titles[m]}: reflect on a recent workplace experience. Identify one behaviour you would like to improve, practise it in your next conversation, and record the outcome. Discuss what worked with a colleague and choose one adjustment for next time.',
-      ),
-];
+LessonType _typeFor(LessonKind kind) => switch (kind) {
+  LessonKind.video => LessonType.video,
+  LessonKind.reading => LessonType.text,
+  LessonKind.pdf => LessonType.pdf,
+  LessonKind.slides => LessonType.presentation,
+  LessonKind.document => LessonType.text,
+  LessonKind.link => LessonType.externalLink,
+};
 
 class CoursePlayerScreen extends StatefulWidget {
   const CoursePlayerScreen({super.key, this.courseId = 'ei-fundamentals'});
@@ -49,7 +36,17 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen> {
     (c) => c.id == widget.courseId,
     orElse: () => mockCourses.first,
   );
-  late final _lessons = _sampleLessons(_course.modules);
+  late final List<CourseLesson> _lessons = _course.courseLessons;
+  late final _sidebarLessons = [
+    for (final l in _lessons)
+      PlayerLesson(
+        moduleIndex: l.module,
+        moduleTitle: _course.modules[l.module],
+        title: l.title,
+        type: _typeFor(l.kind),
+        body: '${l.kind.label} · ${l.minutes} min',
+      ),
+  ];
   late final int _startDone = (progressFor(_course) / 100 * _lessons.length)
       .round();
 
@@ -58,6 +55,8 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen> {
     _course.id,
     () => {for (var i = 0; i < _startDone; i++) i},
   );
+  int get _doneCount =>
+      _done.where((i) => i >= 0 && i < _lessons.length).length;
   late int _current = (lastLesson[_course.id] ?? _startDone)
       .clamp(0, _lessons.length - 1)
       .toInt();
@@ -73,7 +72,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen> {
     super.dispose();
   }
 
-  double get _progress => _done.length / _lessons.length;
+  double get _progress => _doneCount / _lessons.length;
   bool get _isLast => _current == _lessons.length - 1;
 
   void _markComplete() {
@@ -94,7 +93,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen> {
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 900;
     final sidebar = ModuleSidebar(
-      lessons: _lessons,
+      lessons: _sidebarLessons,
       currentIndex: _current,
       completed: _done,
       onSelect: (i) {
@@ -177,12 +176,18 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen> {
                         },
                       ),
                     ),
-                  if (_course.videoUrl != null)
+                  if (_course.videoUrl != null &&
+                      !_lessons.any((l) => l.kind == LessonKind.video))
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: CourseVideo(url: _course.videoUrl!),
                     ),
-                  ContentViewer(lesson: _lessons[_current]),
+                  LessonViewer(
+                    lesson: _lessons[_current],
+                    moduleTitle:
+                        'Module ${_lessons[_current].module + 1}: ${_course.modules[_lessons[_current].module]}',
+                    position: 'Lesson ${_current + 1} of ${_lessons.length}',
+                  ),
                   if (_course.resources.isNotEmpty) ...[
                     const SizedBox(height: 18),
                     Text(

@@ -1,0 +1,5 @@
+# Learning materials are binary; never convert line endings.
+*.pdf binary
+*.pptx binary
+*.docx binary
+*.mp4 binary

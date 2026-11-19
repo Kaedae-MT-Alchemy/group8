@@ -1,4 +1,6 @@
 import '../backend/backend.dart';
+import 'course_content.dart';
+import 'course_seed_content.dart';
 
 class Course {
   final String id;
@@ -28,6 +30,35 @@ class Course {
   /// Extra learning material: videos, articles and guides, each a map with
   /// `kind`, `title` and `url`.
   final List<Map<String, String>> resources;
+
+  /// Lessons saved for this course. Empty means "not set up yet", in which
+  /// case [courseLessons] falls back to the built-in content.
+  final List<CourseLesson> lessons;
+
+  /// Lessons in module order: saved lessons, else the built-in lessons for
+  /// this course, else one placeholder reading per module.
+  List<CourseLesson> get courseLessons {
+    if (lessons.isNotEmpty) {
+      final ordered = orderLessons(lessons, modules.length);
+      if (ordered.isNotEmpty) return ordered;
+    }
+    final seeded = orderLessons([
+      for (final l in seedCourseContent[id]?['lessons'] ?? const [])
+        CourseLesson.fromJson(l),
+    ], modules.length);
+    return seeded.isNotEmpty ? seeded : placeholderLessons(id, modules);
+  }
+
+  /// Quiz questions: saved ones, else the built-in quiz for this course.
+  List<QuizItem> get quizItems {
+    final saved = [for (final q in quiz) QuizItem.fromJson(q)];
+    if (saved.isNotEmpty) return saved;
+    return [
+      for (final q in seedCourseContent[id]?['quiz'] ?? const [])
+        QuizItem.fromJson(q),
+    ];
+  }
+
   bool get isPublished => status == 'Published';
   String get imageAsset =>
       'assets/images/${switch (id) {
@@ -58,7 +89,35 @@ class Course {
     this.passMark = 60,
     this.videoUrl,
     this.resources = const [],
+    this.lessons = const [],
   });
+
+  Course copyWith({
+    List<String>? modules,
+    List<CourseLesson>? lessons,
+    List<Map<String, dynamic>>? quiz,
+    int? passMark,
+  }) => Course(
+    id: id,
+    title: title,
+    shortDescription: shortDescription,
+    instructor: instructor,
+    duration: duration,
+    level: level,
+    rating: rating,
+    price: price,
+    modules: modules ?? this.modules,
+    progress: progress,
+    prerequisites: prerequisites,
+    pdfName: pdfName,
+    pdfBase64: pdfBase64,
+    quiz: quiz ?? this.quiz,
+    status: status,
+    passMark: passMark ?? this.passMark,
+    videoUrl: videoUrl,
+    resources: resources,
+    lessons: lessons ?? this.lessons,
+  );
 }
 
 /// Courses visible to learners and buyers.
@@ -415,6 +474,7 @@ Map<String, dynamic> courseToJson(Course c) => {
   'passMark': c.passMark,
   'videoUrl': c.videoUrl,
   'resources': c.resources,
+  'lessons': [for (final l in c.lessons) l.toJson()],
 };
 
 Course courseFromJson(Map<String, dynamic> c, {String? pdfBase64}) => Course(
@@ -442,6 +502,10 @@ Course courseFromJson(Map<String, dynamic> c, {String? pdfBase64}) => Course(
   quiz: [
     for (final q in c['quiz'] as List? ?? [])
       Map<String, dynamic>.from(q as Map),
+  ],
+  lessons: [
+    for (final l in c['lessons'] as List? ?? [])
+      CourseLesson.fromJson(Map<String, dynamic>.from(l as Map)),
   ],
 );
 

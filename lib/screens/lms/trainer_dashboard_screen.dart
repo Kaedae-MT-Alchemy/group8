@@ -5,6 +5,7 @@ import '../../cms/editable.dart';
 
 import '../../backend/backend.dart';
 import '../../data/mock_data.dart';
+import '../../data/progress_store.dart' show lessonPercent;
 import '../../data/quiz_attempts.dart';
 import '../../shared/auth_prototype_store.dart';
 import '../../shared/learning_navigation.dart';
@@ -58,13 +59,10 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
       for (final id in enrolled) {
         final course = mockCourses.where((c) => c.id == id).firstOrNull;
         if (course == null) continue;
-        final lessons = (done[id] as List?)?.length ?? 0;
-        final percent = course.modules.isEmpty
-            ? 0
-            : (lessons / (course.modules.length * 4) * 100).round().clamp(
-                0,
-                100,
-              );
+        final percent = lessonPercent(course, [
+          for (final n in done[id] as List? ?? const [])
+            if (n is num) n.toInt(),
+        ]);
         rows.add(
           _LearnerProgress(
             doc.id,

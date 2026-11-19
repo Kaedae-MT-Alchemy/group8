@@ -87,15 +87,20 @@ class ModuleSidebar extends StatelessWidget {
       children.add(
         ListTile(
           dense: true,
-          contentPadding: const EdgeInsets.only(left: 52, right: 16),
+          contentPadding: const EdgeInsets.only(left: 24, right: 16),
           selected: isCurrent,
           selectedColor: deepBlue,
+          leading: Icon(lesson.type.icon, size: 20),
+          minLeadingWidth: 20,
           title: Text(
             lesson.title,
             style: TextStyle(
               fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w500,
             ),
           ),
+          subtitle: lesson.body.isEmpty
+              ? null
+              : Text(lesson.body, style: const TextStyle(fontSize: 12)),
           trailing: _icon(completed.contains(i), isCurrent),
           onTap: () => onSelect(i),
         ),
