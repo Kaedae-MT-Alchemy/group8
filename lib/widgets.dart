@@ -216,24 +216,30 @@ class SiteShell extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'MT ALCHEMY',
+                        'MT Alchemy',
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontFamily: Tok.display,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.4,
-                          color: Tok.brand,
+                          fontFamily: Tok.serif,
+                          fontSize: compactHeader ? 20 : 22,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                          height: 1.1,
+                          color: Tok.brandDeep,
                         ),
                       ),
                       if (!compactHeader)
                         const Text(
                           'Made to Thrive',
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Tok.calmText,
-                            fontWeight: FontWeight.w600,
+                            fontFamily: Tok.serif,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                            height: 1.2,
+                            color: Tok.textMuted,
                           ),
                         ),
                     ],
@@ -351,14 +357,30 @@ class SiteShell extends StatelessWidget {
                   children: [
                     const Padding(
                       padding: EdgeInsets.all(16),
-                      child: Text(
-                        'MT ALCHEMY',
-                        style: TextStyle(
-                          fontFamily: Tok.display,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: deepBlue,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'MT Alchemy',
+                            style: TextStyle(
+                              fontFamily: Tok.serif,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.2,
+                              color: Tok.brandDeep,
+                            ),
+                          ),
+                          Text(
+                            'Made to Thrive',
+                            style: TextStyle(
+                              fontFamily: Tok.serif,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                              color: Tok.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     if (signedIn)
@@ -855,13 +877,24 @@ class SiteFooter extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'MT ALCHEMY',
+                        'MT Alchemy',
                         style: TextStyle(
-                          fontFamily: Tok.display,
+                          fontFamily: Tok.serif,
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                          height: 1.1,
+                        ),
+                      ),
+                      Text(
+                        'Made to Thrive',
+                        style: TextStyle(
+                          fontFamily: Tok.serif,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
                           color: Tok.accent,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.5,
+                          fontSize: 15,
                         ),
                       ),
                       SizedBox(height: Tok.s3),

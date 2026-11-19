@@ -6,10 +6,10 @@ import 'package:flutter/services.dart';
 import '../shared/file_export.dart';
 import '../shared/auth_prototype_store.dart';
 import '../shared/portal_components.dart';
-import '../shared/report_document.dart';
 import '../theme.dart';
 import '../widgets.dart';
 import 'bank_transfer_widgets.dart';
+import 'invoice_pdf.dart';
 import 'commerce_prototype_store.dart';
 import 'payment_gateway.dart';
 import 'stripe_checkout.dart';
@@ -753,11 +753,7 @@ class OrderConfirmationPage extends StatelessWidget {
                   ),
                 Padding(
                   padding: const EdgeInsets.only(top: 14),
-                  child: OutlinedButton.icon(
-                    onPressed: () => _downloadInvoice(context, order),
-                    icon: const Icon(Icons.picture_as_pdf_outlined),
-                    label: const Text('Download bill / invoice PDF'),
-                  ),
+                  child: InvoiceActions(order: order),
                 ),
               ],
               const SizedBox(height: 18),
@@ -865,11 +861,7 @@ class MyOrdersPage extends StatelessWidget {
                               : 'Ship to: ${order.shippingAddress}',
                         ),
                       const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: () => _downloadInvoice(context, order),
-                        icon: const Icon(Icons.picture_as_pdf_outlined),
-                        label: const Text('Download bill / invoice'),
-                      ),
+                      InvoiceActions(order: order, dense: true),
                       for (final line in order.lines)
                         Text('${line.product.name} × ${line.quantity}'),
                       if (order.hasDigital)
@@ -890,49 +882,6 @@ class MyOrdersPage extends StatelessWidget {
         ],
       );
     },
-  );
-}
-
-Future<void> _downloadInvoice(BuildContext context, ShopOrder order) async {
-  final subtotal = order.lines.fold<double>(
-    0,
-    (sum, line) => sum + line.subtotal,
-  );
-  final shipping = order.total - subtotal;
-  final lines = <String>[
-    'MT ALCHEMY - ORDER BILL / PROTOTYPE INVOICE',
-    'Order: ${order.number}',
-    'Date: ${order.date.day}/${order.date.month}/${order.date.year}',
-    'Customer: ${order.customerName}',
-    'Email: ${order.customerEmail}',
-    'Phone: ${order.customerPhone}',
-    'Bill to: ${order.billingAddress ?? 'Not provided'}',
-    if (order.hasPhysical)
-      'Ship to: ${order.shippingAddress ?? 'Not provided'}',
-    'Payment: ${order.paymentMethod} / ${order.paymentStatus}',
-    'Fulfilment: ${order.fulfilmentStatus}',
-    if (order.trackingNumber != null) 'Tracking: ${order.trackingNumber}',
-    'Items:',
-    for (final line in order.lines)
-      '${line.product.name} x ${line.quantity} @ RM ${line.product.price.toStringAsFixed(2)} = RM ${line.subtotal.toStringAsFixed(2)}',
-    'Subtotal: RM ${subtotal.toStringAsFixed(2)}',
-    'Shipping: ${order.hasPhysical ? 'RM ${shipping.toStringAsFixed(2)}' : 'Not applicable (digital order)'}',
-    'Total: RM ${order.total.toStringAsFixed(2)}',
-    'This is an order summary, not a tax invoice.',
-  ];
-  final path = await saveLocalFile(
-    'invoice-${order.number}.pdf',
-    createReportPdf(lines),
-  );
-  if (!context.mounted) return;
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(
-        path == null
-            ? 'PDF saving is unavailable on this platform.'
-            : 'Bill saved to $path',
-      ),
-    ),
   );
 }
 

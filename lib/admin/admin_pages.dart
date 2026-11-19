@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../commerce/bank_transfer_widgets.dart';
 import '../commerce/commerce_prototype_store.dart';
+import '../commerce/invoice_pdf.dart';
 import '../commerce/stripe_checkout.dart';
 import '../shared/portal_components.dart';
 import '../theme.dart';
@@ -1074,6 +1075,8 @@ class _OrderManagementPageState extends State<OrderManagementPage> {
                         Text(
                           '${line.product.name} × ${line.quantity} (${line.product.digital ? 'Digital' : 'Physical'})',
                         ),
+                      const SizedBox(height: 8),
+                      InvoiceActions(order: order, dense: true),
                       if (order.isBankTransfer)
                         TransferReviewPanel(order: order),
                       if (StripeCheckout.enabled &&

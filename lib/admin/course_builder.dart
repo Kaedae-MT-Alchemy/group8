@@ -505,29 +505,35 @@ class _CourseBuilderPageState extends State<CourseBuilderPage> {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      quiz[i].type.label.toUpperCase(),
-                      style: const TextStyle(
-                        color: purple,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 11,
-                        letterSpacing: 1,
+                child: Semantics(
+                  container: true,
+                  label:
+                      'Question ${i + 1}, ${quiz[i].type.label}: ${quiz[i].prompt}. Answer: ${quiz[i].displayAnswer}',
+                  excludeSemantics: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        quiz[i].type.label.toUpperCase(),
+                        style: const TextStyle(
+                          color: purple,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 11,
+                          letterSpacing: 1,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      quiz[i].prompt,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Answer: ${quiz[i].displayAnswer}',
-                      style: const TextStyle(color: Colors.black54),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        quiz[i].prompt,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Answer: ${quiz[i].displayAnswer}',
+                        style: const TextStyle(color: Colors.black54),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               IconButton(

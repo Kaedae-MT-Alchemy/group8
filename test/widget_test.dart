@@ -14,6 +14,6 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('MT ALCHEMY'), findsWidgets);
+    expect(find.text('MT Alchemy'), findsWidgets);
   });
 }
