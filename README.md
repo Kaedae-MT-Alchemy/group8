@@ -12,24 +12,35 @@
 ![Stripe](https://img.shields.io/badge/Payments-Stripe-635BFF?logo=stripe&logoColor=white)
 ![Gemini](https://img.shields.io/badge/AI-Gemini%203.5%20Flash-8E75B2?logo=googlegemini&logoColor=white)
 [![Test and deploy](https://github.com/sayyadsuzain9001/MT-Alchemy/actions/workflows/deploy.yml/badge.svg)](https://github.com/sayyadsuzain9001/MT-Alchemy/actions/workflows/deploy.yml)
-![Tests](https://img.shields.io/badge/tests-38%20passing-2E7D32)
+![Tests](https://img.shields.io/badge/tests-101%20passing-2E7D32)
+![Courses](https://img.shields.io/badge/courses-8%20%C2%B7%20128%20lessons-2412B8)
 
 <img src="docs/screenshots/home.jpg" alt="MT Alchemy homepage" width="860" />
 
+**[Live site](https://sayyadsuzain9001.github.io/MT-Alchemy/)** · **[Course mirror](https://kaedae-mt-alchemy.github.io/group8/)** · **[Setup guide](SETUP.md)** · **[What's new](docs/FINAL_UPDATE.md)**
+
 </div>
 
-> **Cloning this project?** Read **[SETUP.md](SETUP.md)** first: it explains every API key (Firebase, Gemini, Stripe), which domains to authorize, and which names to change before deploying under your own account.
+> [!IMPORTANT]
+> **Cloning this project?** Read **[SETUP.md](SETUP.md)** first. It explains every API key (Firebase, Gemini, Stripe), which domains to authorize, and which names to change before deploying under your own account. Never commit `config/app_env.json` or `payments_server/.env`; both are git-ignored.
+
+> [!TIP]
+> **Just want to look around?** Open the [live site](https://sayyadsuzain9001.github.io/MT-Alchemy/), choose **Sign in**, and tap one of the demo-account chips (Learner, Trainer, Employer or Admin).
 
 ---
 
 ## Table of contents
 
 - [About](#about)
+- [What's new](#whats-new)
 - [Features](#features)
 - [Screenshots](#screenshots)
 - [Tech stack](#tech-stack)
 - [User roles](#user-roles)
 - [User journeys](#user-journeys)
+- [Courses, lessons and quizzes](#courses-lessons-and-quizzes)
+- [Editing the website (super admin)](#editing-the-website-super-admin)
+- [Invoices and receipts](#invoices-and-receipts)
 - [Getting started](#getting-started)
 - [Configuration](#configuration)
 - [Deploy with GitHub Actions](#deploy-with-github-actions)
@@ -52,16 +63,31 @@ MT Alchemy is a people-development consultancy specialising in emotional intelli
 - **workspaces** for learners, employers, trainers and administrators,
 - an **AI assistant** that answers questions about courses, services and the store.
 
+## What's new
+
+> [!NOTE]
+> Full release notes are in **[docs/FINAL_UPDATE.md](docs/FINAL_UPDATE.md)**.
+
+| Update | What it means |
+| --- | --- |
+| 🎓 **Real course content** | All 8 courses now have 16 lessons each across 5 modules: a welcome video, a TED/YouTube talk per module, reading notes, slides (PPTX), a workbook and action plan (PDF), a reflection worksheet (DOCX) and further reading. |
+| 📝 **Proper quizzes** | 8 questions per course mixing multiple choice, select-all, true/false and short answer, each with an explanation on the results page. |
+| 🛠️ **Lessons & quiz builder** | Admins and trainers add, edit, reorder and delete modules, lessons and questions, and upload PDF, PPT/PPTX, DOC/DOCX or MP4 files (up to 10 MB) or paste YouTube, MP4 and web links. |
+| 🖼️ **Editable website** | A super admin can change every photo and text on the public site straight from the page ("Edit this page"), and the change is live for every visitor. |
+| 🧭 **A page per programme** | "Explore programme" opens that programme's own page (`/programme/<name>`) in one click. |
+| 🧾 **Invoices and receipts** | Every order has a branded PDF invoice, which becomes a receipt once paid, with Download and Print buttons. |
+| ✍️ **New wordmark** | "MT Alchemy · *Made to Thrive*" set in Fraunces across the header, menu and footer. |
+
 ## Features
 
 | Area | Highlights |
 | --- | --- |
 | Website | Separate homepages for individuals and organizations, services, coaching, corporate programmes with brochure PDFs, impact stories, insights, contact form |
-| Learning | Course catalogue with Draft / Published / Archived status, paid enrolment, course player (Previous / Mark complete / Next), quizzes with pass marks, trainer feedback, certificates with QR verification |
-| Store | Digital and physical products, cart, checkout with shipping, Stripe Checkout, order tracking, digital library |
+| Learning | Course catalogue with Draft / Published / Archived status, paid enrolment, **course player for video, PDF, slides, documents, readings and links**, mixed-type quizzes with explanations and pass marks, trainer feedback, certificates with QR verification |
+| Store | Digital and physical products, cart, checkout with shipping, Stripe Checkout, bank transfer with receipt upload, order tracking, digital library, **PDF invoices and receipts** |
 | Employers | Bulk employee invites and course assignment from Excel/CSV, course seat purchases, progress charts by department, CSV/PDF reports, quotation requests |
 | Trainers | Review quiz submissions, give feedback, follow learner progress, create and edit courses |
-| Admins | Users and roles, organizations, courses, products and stock, orders and payments, quotes, enquiries, revenue and order charts |
+| Admins | Users and roles, organizations, **Lessons & quiz builder with file uploads**, products and stock, orders and payments, quotes, enquiries, revenue and order charts, **on-page editing of every website photo and text** |
 | Everyone | Profiles with photo, in-app notifications, Gemini-powered assistant, responsive layout for desktop, tablet and phone |
 
 ## Screenshots
@@ -73,6 +99,12 @@ MT Alchemy is a people-development consultancy specialising in emotional intelli
 | <img src="docs/screenshots/admin_dashboard.jpg" width="420" /> | <img src="docs/screenshots/trainer_dashboard.jpg" width="420" /> |
 | **Certificate with QR verification** | **Stripe payment confirmed** |
 | <img src="docs/screenshots/certificate.jpg" width="420" /> | <img src="docs/screenshots/stripe_payment.jpg" width="420" /> |
+| **Course player: slides** | **Course player: PDF workbook** |
+| <img src="docs/screenshots/course_player_slides.jpg" width="420" /> | <img src="docs/screenshots/course_player_pdf.jpg" width="420" /> |
+| **Lessons & quiz builder (admin)** | **Receipt PDF** |
+| <img src="docs/screenshots/course_builder.jpg" width="420" /> | <img src="docs/screenshots/invoice.jpg" width="300" /> |
+| **Programme page** | **Edit this page (super admin)** |
+| <img src="docs/screenshots/programme_page.jpg" width="420" /> | <img src="docs/screenshots/edit_mode.jpg" width="420" /> |
 | **Alchemy Assistant (Gemini)** | **Homepage sections** |
 | <img src="docs/screenshots/chatbot.jpg" width="420" /> | <img src="docs/screenshots/home_sections.jpg" width="420" /> |
 
@@ -132,6 +164,60 @@ The sign-in page shows one-tap chips for these accounts. Hide them with `SHOW_DE
 | **E. Corporate enquiry** | Organizations → enquiry → admin inbox → consultation and quotation |
 
 All five journeys are covered by automated browser tests in `e2e/`.
+
+## Courses, lessons and quizzes
+
+Every course is made of **modules**, each module holds **lessons**, and the course ends with a **quiz**.
+
+| Lesson type | Learners see | Admins can add |
+| --- | --- | --- |
+| 🎬 Video | YouTube player or a built-in MP4 player | YouTube link, MP4 link or an uploaded MP4/WebM file |
+| 📄 PDF | The PDF inline, with Open and Download | Uploaded PDF or a link |
+| 📊 Slides | PowerPoint shown inline (Microsoft viewer), with Download | Uploaded PPT/PPTX or a link |
+| 📝 Document | Word document shown inline or as a download | Uploaded DOC/DOCX or a link |
+| 📖 Reading | Formatted notes with key ideas and a practice task | Text written in the builder |
+| 🔗 Link | A card that opens the article | Any web address |
+
+**Quiz question types:** multiple choice, select all that apply, true or false, and short answer (accepted keywords, not case-sensitive). Each question can have an explanation that learners see after submitting.
+
+> [!IMPORTANT]
+> A certificate is issued only when the learner has completed **every lesson** and scored at least the course's **pass mark** (60% by default).
+
+**Managing content:** Admin portal → **Courses** → **Lessons & quiz**. Upload files up to **10 MB**; for longer videos, upload to YouTube and paste the link. Uploaded files are stored in Firestore in 900 KB chunks (`lessonFiles`), so no Firebase Storage bucket is needed.
+
+<details>
+<summary>Built-in sample content and how to regenerate it</summary>
+
+The sample lessons, quizzes and files come from [`tool/course_content/content.py`](tool/course_content/content.py). After editing it, run:
+
+```powershell
+pip install python-docx python-pptx reportlab
+python tool/course_content/build_course_content.py
+```
+
+This rebuilds the slides, workbooks, worksheets, action plans and welcome videos in `assets/materials/` (the videos need `ffmpeg`) and the generated `lib/data/course_seed_content.dart`. Courses saved in the database without lessons fall back to this content automatically, and older courses with the previous quiz format keep working.
+
+</details>
+
+## Editing the website (super admin)
+
+Signed in as an admin, open any public page and press **Edit this page**:
+
+- **Change image** on any photo: pick from the photo library, upload your own (compressed automatically) or paste a link.
+- **Pencil** on any heading or paragraph to rewrite it.
+- **Reset to original** puts the built-in photo or text back.
+
+Changes are saved in Firestore (`siteContent`, `siteImages`) and appear for every visitor immediately. The **Website content** page in the admin portal lists every change in one place.
+
+## Invoices and receipts
+
+Every order has a professional A4 PDF with the MT Alchemy logo and contact details, bill-to and ship-to, an item table (course, digital or physical), subtotal, shipping, total in RM, payment method and reference.
+
+- Unpaid orders give an **Invoice** (`INV-<order number>`); once paid it becomes a **Receipt** (`RCT-<order number>`).
+- **Download** and **Print** buttons appear on the order confirmation, order details, My Orders and admin Orders pages.
+
+> [!NOTE]
+> The document is an order invoice or receipt. It does not carry tax or company registration numbers.
 
 ## Getting started
 
@@ -249,6 +335,7 @@ Every step is saved in Firestore (`orders`, `paymentProofs`, `notifications`) an
 
 The **Alchemy Assistant** appears on every page. It is grounded on MT Alchemy's services, the live course catalogue, store products and the user's role, and it suggests buttons that open the right page. If the AI service is busy or not configured, it falls back to built-in answers.
 
+> [!WARNING]
 > In a web app the Gemini key is visible to the browser. Restrict it in Google Cloud Console to the Generative Language API and your site's domain.
 
 ## Data model and security
@@ -257,7 +344,9 @@ The **Alchemy Assistant** appears on every page. It is grounded on MT Alchemy's 
 | --- | --- | --- |
 | `users` | Profile and role | Owner; admins and trainers read; role cannot be self-changed |
 | `products` | Store catalogue and stock | Public read; admin write |
-| `courses`, `courseFiles` | Courses, quizzes, PDFs | Public read; admin and trainer write |
+| `courses`, `courseFiles` | Courses, modules, lessons, quizzes | Public read; admin and trainer write |
+| `lessonFiles` | Uploaded lesson files (stored in chunks) | Signed-in read; admin and trainer write |
+| `siteContent`, `siteImages`, `sitePages` | Website text and photo changes | Public read; admin write |
 | `orders` | Orders, payments, shipping | Owner and admin |
 | `paymentProofs` | Bank transfer receipts (one per order) | Owner uploads; owner and admin read |
 | `progress`, `quizAttempts`, `certificates` | Learning records | Learner; trainers and admins read; certificates publicly verifiable |
@@ -273,7 +362,7 @@ flutter analyze
 flutter test
 ```
 
-- **38 unit and widget tests** run against an in-memory Firestore.
+- **101 unit and widget tests** run against an in-memory Firestore, including the course model, quiz scoring, chunked file storage, the Lessons & quiz builder, invoices and site editing.
 - **End-to-end scripts** in `e2e/` (Playwright with Chrome) cover all five journeys, admin and trainer tools, profiles, navigation, Stripe Checkout and 23 security-rule checks.
 
 ## Project structure
@@ -282,14 +371,17 @@ flutter test
 lib/
 ├── backend/       Firebase setup, auth gateway, Firestore sync
 ├── chat/          AI assistant service and chat UI
-├── commerce/      Store, cart, checkout, Stripe, orders, quotes, course purchases
+├── cms/           On-page editing of website text and photos
+├── commerce/      Store, cart, checkout, Stripe, orders, invoices, quotes, course purchases
 ├── employer/      Employer workspace and bulk Excel/CSV import
-├── admin/         Admin dashboard, users, products, orders, courses
+├── admin/         Admin dashboard, users, products, orders, courses, Lessons & quiz builder
 ├── screens/lms/   Learning hub, course player, quiz, certificates, dashboards
 ├── shared/        Sign-in, profiles, notifications, charts, UI kit
-├── data/          Courses, progress and quiz attempts
+├── data/          Courses, lessons, quizzes, lesson files, progress
 ├── pages.dart     Public website pages and routing
 └── widgets.dart   Site shell, header and navigation
+assets/materials/  Sample course files (PDF, PPTX, DOCX, MP4)
+tool/course_content/  Course content and the generator for the sample files
 firebase_seed/     Demo data seed scripts
 payments_server/   Stripe Checkout server (Node.js)
 e2e/               Browser end-to-end tests
@@ -298,6 +390,7 @@ docs/              ERD, maintenance guide, screenshots, credits
 
 ## Documentation
 
+- [Final update (release notes)](docs/FINAL_UPDATE.md): everything added in the latest round and how it was tested
 - [Maintenance guide](docs/maintenance_guide.md): everyday admin tasks, configuration, payments, tests
 - [Firestore ERD](docs/firestore_erd.md): data model
 - [Image credits](docs/image_credits.md) and [stock photo credits](docs/stock_photo_credits.md)
@@ -307,4 +400,11 @@ docs/              ERD, maintenance guide, screenshots, credits
 
 - Company photos and content © MT Alchemy (Kaedae Event Management).
 - Additional photography from [StockSnap](https://stocksnap.io), released under CC0.
+- Lesson videos are public TED, TEDx and other YouTube talks, embedded with YouTube's player and credited in each lesson title.
 - Built with Flutter, Firebase, Stripe and Google Gemini.
+
+---
+
+<div align="center">
+<sub>Made with care by <b>Sayyad</b> ✨</sub>
+</div>
