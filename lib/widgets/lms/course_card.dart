@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../cms/editable.dart';
+
 import '../../data/mock_data.dart';
 import '../../data/progress_store.dart';
 import '../../shared/format.dart';
@@ -32,12 +34,7 @@ class CourseCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(14),
-            child: Image.asset(
-              course.imageAsset,
-              height: 170,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            child: CourseCover(course, height: 170, width: double.infinity),
           ),
           const SizedBox(height: 18),
 

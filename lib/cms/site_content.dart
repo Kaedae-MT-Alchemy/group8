@@ -273,6 +273,9 @@ ImageProvider siteImageProvider(String src) {
   return AssetImage(src);
 }
 
+/// Content key of a course's cover photo.
+String courseImageKey(String courseId) => 'course.$courseId.image';
+
 /// Stable content key from a default text: "Learn at your own pace." →
 /// "learn-at-your-own-pace".
 String contentKey(String prefix, String text) {

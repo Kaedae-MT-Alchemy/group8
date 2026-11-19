@@ -1,6 +1,8 @@
 import '../../shared/learning_navigation.dart';
 import 'package:flutter/material.dart';
 
+import '../../cms/editable.dart';
+
 import '../../theme.dart';
 import '../../widgets.dart';
 import '../../widgets/lms/course_media.dart';
@@ -41,11 +43,10 @@ class CourseDetailScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: Image.asset(
-                    course.imageAsset,
+                  child: CourseCover(
+                    course,
                     height: 240,
                     width: double.infinity,
-                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(height: 20),

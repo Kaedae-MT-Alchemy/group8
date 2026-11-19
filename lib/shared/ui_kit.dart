@@ -238,11 +238,11 @@ class _PhotoFeatureCardState extends State<PhotoFeatureCard> {
                           scale: _hover && Motion.enabled(context) ? 1.04 : 1,
                           duration: Tok.base,
                           curve: Tok.easeOut,
-                          child: Image.asset(
+                          child: SiteImage(
+                            '${contentKey('card', widget.title)}.image',
                             widget.image,
                             height: widget.imageHeight,
                             width: double.infinity,
-                            fit: BoxFit.cover,
                             semanticLabel: widget.title,
                           ),
                         ),
@@ -569,7 +569,11 @@ class DashboardHeader extends StatelessWidget {
                               stops: [0, 0.35],
                             ).createShader(r),
                             blendMode: BlendMode.dstIn,
-                            child: Image.asset(image, fit: BoxFit.cover),
+                            child: SiteImage(
+                              '${contentKey('dashboard', title)}.image',
+                              image,
+                              label: 'Dashboard photo',
+                            ),
                           ),
                         ),
                       ],

@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:publicwebsite/cms/content_admin_page.dart';
 import 'package:publicwebsite/cms/editable.dart';
 import 'package:publicwebsite/cms/site_content.dart';
+import 'package:publicwebsite/pages.dart';
+import 'package:publicwebsite/programme_detail.dart';
 import 'package:publicwebsite/shared/auth_prototype_store.dart';
 import 'package:publicwebsite/theme.dart';
 
@@ -94,5 +96,52 @@ void main() {
 
     await store.deletePage(page.slug);
     expect(store.pageBySlug(page.slug), isNull);
+  });
+
+  testWidgets('a replaced photo shows instead of the default', (tester) async {
+    store.start();
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SiteImage('about.founder.image', 'assets/images/esther_ng.png'),
+      ),
+    );
+    Image img() => tester.widget<Image>(find.byType(Image));
+    expect(
+      (img().image as AssetImage).assetName,
+      'assets/images/esther_ng.png',
+    );
+    await fakeDb.collection('siteImages').doc('about.founder.image').set({
+      'key': 'about.founder.image',
+      'src': 'assets/images/trainer_presenting.jpeg',
+    });
+    await tester.pump();
+    expect(
+      (img().image as AssetImage).assetName,
+      'assets/images/trainer_presenting.jpeg',
+    );
+  });
+
+  testWidgets('each programme card opens its own programme page', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1600, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    for (final s in services) {
+      expect(programmeDetails[s.$1], isNotNull, reason: s.$1);
+    }
+    final route = programmeRoute('Leadership & Communication');
+    expect(route, '/programme/leadership-communication');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildTheme(),
+        onGenerateRoute: buildRoute,
+        initialRoute: route,
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Leadership & Communication'), findsWidgets);
+    expect(find.text('Enquire about this programme'), findsOneWidget);
+    expect(find.text('Programme not found'), findsNothing);
   });
 }

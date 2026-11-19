@@ -9,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'shared/file_export.dart';
 import 'shared/report_document.dart';
 import 'cms/content_admin_page.dart';
+import 'programme_detail.dart';
 import 'cms/editable.dart';
+import 'cms/site_content.dart';
 import 'shared/effects.dart';
 import 'shared/motion.dart';
 import 'shared/programme_carousel.dart';
@@ -50,6 +52,16 @@ Route<dynamic> buildRoute(RouteSettings settings) {
           sessionId: q['session_id'],
           status: q['status'],
         ),
+      ),
+    );
+  }
+  if (route.startsWith('/programme/')) {
+    final slug = route.substring('/programme/'.length);
+    return MaterialPageRoute(
+      settings: settings,
+      builder: (_) => SiteShell(
+        route: route,
+        child: ProgrammeDetailPage(slug: slug),
       ),
     );
   }
@@ -417,7 +429,8 @@ class HomePage extends StatelessWidget {
                               image:
                                   serviceImages[item.$1] ??
                                   'assets/images/stock/planning.jpg',
-                              onOpen: () => go(context, '/services'),
+                              onOpen: () =>
+                                  go(context, programmeRoute(item.$1)),
                             ),
                         ],
                       ),
@@ -1160,7 +1173,11 @@ class _ImpactPhoto extends StatelessWidget {
     child: Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(path, fit: BoxFit.cover, semanticLabel: label),
+        SiteImage(
+          '${contentKey('photo', label)}.image',
+          path,
+          semanticLabel: label,
+        ),
         DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -1318,11 +1335,12 @@ class AboutPage extends StatelessWidget {
             builder: (context, box) {
               final photo = ClipRRect(
                 borderRadius: BorderRadius.circular(18),
-                child: Image.asset(
+                child: const SiteImage(
+                  'about.founder.image',
                   'assets/images/trainer_presenting.jpeg',
                   width: 320,
                   height: 360,
-                  fit: BoxFit.cover,
+                  label: 'Founder photo',
                 ),
               );
               final copy = const Column(
@@ -1374,11 +1392,12 @@ class AboutPage extends StatelessWidget {
             builder: (context, box) {
               final photo = ClipRRect(
                 borderRadius: BorderRadius.circular(18),
-                child: Image.asset(
+                child: const SiteImage(
+                  'about.team.esther.image',
                   'assets/images/esther_ng.png',
                   width: 280,
                   height: 300,
-                  fit: BoxFit.cover,
+                  label: 'Team member photo',
                 ),
               );
               final copy = const Column(
@@ -1449,7 +1468,7 @@ class ServicesPage extends StatelessWidget {
                   image:
                       serviceImages[item.$1] ??
                       'assets/images/stock/planning.jpg',
-                  onOpen: () => go(context, '/contact'),
+                  onOpen: () => go(context, programmeRoute(item.$1)),
                 ),
             ],
           ),
@@ -1470,11 +1489,12 @@ class ServicesPage extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
+                      child: SiteImage(
+                        '${contentKey('programme', item.$1)}.photo',
                         seedCourses[services.indexOf(item)].imageAsset,
                         height: 180,
                         width: double.infinity,
-                        fit: BoxFit.cover,
+                        label: item.$1,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -1504,13 +1524,17 @@ class ServicesPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      '• Build practical awareness\n• Apply learning at work\n• Support sustainable behaviour change',
+                    Text(
+                      (programmeDetails[item.$1]?.$1 ?? const <String>[])
+                          .take(3)
+                          .map((o) => '• $o')
+                          .join('\n'),
+                      style: const TextStyle(height: 1.6),
                     ),
                     const SizedBox(height: 22),
                     TextButton(
-                      onPressed: () => go(context, '/contact'),
-                      child: const Text('Enquire →'),
+                      onPressed: () => go(context, programmeRoute(item.$1)),
+                      child: const Text('View programme →'),
                     ),
                   ],
                 ),
@@ -2468,7 +2492,12 @@ class _ImpactStoryCard extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-          child: Image.asset(story.$4, height: 220, fit: BoxFit.cover),
+          child: SiteImage(
+            '${contentKey('story', story.$3)}.image',
+            story.$4,
+            height: 220,
+            label: story.$3,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(22),
@@ -3129,11 +3158,12 @@ class IndividualHomePage extends StatelessWidget {
                   );
                   final photo = ClipRRect(
                     borderRadius: BorderRadius.circular(26),
-                    child: Image.asset(
+                    child: const SiteImage(
+                      'photo.student-interaction.image',
                       'assets/images/impact_student_interaction.jpeg',
                       height: 380,
                       width: double.infinity,
-                      fit: BoxFit.cover,
+                      label: 'Photo',
                     ),
                   );
                   return box.maxWidth >= 820
@@ -3174,11 +3204,10 @@ class IndividualHomePage extends StatelessWidget {
                             borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(18),
                             ),
-                            child: Image.asset(
-                              c.imageAsset,
+                            child: CourseCover(
+                              c,
                               height: 170,
                               width: double.infinity,
-                              fit: BoxFit.cover,
                             ),
                           ),
                           Padding(

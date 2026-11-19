@@ -202,11 +202,12 @@ class SiteShell extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
+                  child: const SiteImage(
+                    'site.logo',
                     'assets/images/logo_mt_alchemy.jpeg',
                     width: 48,
                     height: 48,
-                    fit: BoxFit.cover,
+                    label: 'Logo',
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -738,39 +739,44 @@ class PhotoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ClipRRect(
     borderRadius: BorderRadius.circular(22),
-    child: Container(
-      height: height,
-      decoration: BoxDecoration(
-        image: DecorationImage(image: AssetImage(path), fit: BoxFit.cover),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        alignment: Alignment.bottomLeft,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.transparent, Color(0xD900001F)],
-          ),
+    child: CmsImage(
+      '${contentKey('photo', title)}.image',
+      path,
+      label: title,
+      builder: (context, provider) => Container(
+        height: height,
+        decoration: BoxDecoration(
+          image: DecorationImage(image: provider, fit: BoxFit.cover),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 21,
-                fontWeight: FontWeight.w800,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          alignment: Alignment.bottomLeft,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Color(0xD900001F)],
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              subtitle,
-              style: const TextStyle(color: Colors.white, height: 1.4),
-            ),
-          ],
+              const SizedBox(height: 6),
+              Text(
+                subtitle,
+                style: const TextStyle(color: Colors.white, height: 1.4),
+              ),
+            ],
+          ),
         ),
       ),
     ),

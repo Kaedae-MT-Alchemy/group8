@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../cms/editable.dart';
+
 import '../data/mock_data.dart';
 import '../data/progress_store.dart';
 import '../shared/auth_prototype_store.dart';
@@ -152,11 +154,7 @@ class _CourseEnrolScreenState extends State<CourseEnrolScreen> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(16),
-                          child: Image.asset(
-                            course.imageAsset,
-                            height: 180,
-                            fit: BoxFit.cover,
-                          ),
+                          child: CourseCover(course, height: 180),
                         ),
                         const SizedBox(height: 18),
                         Text(

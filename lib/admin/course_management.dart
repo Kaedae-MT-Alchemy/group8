@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../backend/backend.dart';
+import '../cms/editable.dart';
+import '../cms/site_content.dart';
 import '../data/mock_data.dart';
 import '../shared/format.dart';
 import '../widgets.dart';
@@ -193,6 +195,20 @@ class _CourseEditorState extends State<CourseEditor> {
   late final prerequisites = {...?widget.course?.prerequisites};
   late String? pdfName = widget.course?.pdfName;
   late String? pdfData = widget.course?.pdfBase64;
+
+  /// Cover photo picked in this dialog; null keeps the current one and an
+  /// empty string goes back to the default.
+  String? cover;
+  String get _defaultCover =>
+      widget.course?.imageAsset ?? 'assets/images/workshop_eq_facilitator.jpeg';
+  String get _currentCover => cover == null || cover!.isEmpty
+      ? (cover == null && widget.course != null
+            ? SiteContentStore.instance.image(
+                courseImageKey(widget.course!.id),
+                _defaultCover,
+              )
+            : _defaultCover)
+      : cover!;
   String? error;
   bool saving = false;
   @override
@@ -309,6 +325,12 @@ class _CourseEditorState extends State<CourseEditor> {
         ...mockCourses.where((item) => item.id != c.id),
         c,
       ]);
+      if (cover != null) {
+        await SiteContentStore.instance.setImage(
+          courseImageKey(c.id),
+          cover!.isEmpty ? null : cover,
+        );
+      }
       if (mounted) Navigator.pop(context);
     } catch (_) {
       if (mounted) {
@@ -418,6 +440,45 @@ class _CourseEditorState extends State<CourseEditor> {
                       ],
                       onChanged: (v) => setState(() => status = v ?? status),
                     ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image(
+                      image: siteImageProvider(_currentCover),
+                      width: 96,
+                      height: 64,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, _, _) => const SizedBox(
+                        width: 96,
+                        height: 64,
+                        child: Icon(Icons.image_not_supported_outlined),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      'Course photo',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.image_outlined, size: 18),
+                    label: const Text('Change photo'),
+                    onPressed: () async {
+                      final picked = await pickSiteImage(
+                        context,
+                        title: 'Course photo',
+                        current: _currentCover,
+                        canReset: true,
+                      );
+                      if (picked != null) setState(() => cover = picked);
+                    },
                   ),
                 ],
               ),

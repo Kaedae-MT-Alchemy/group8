@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme.dart';
+import '../cms/editable.dart';
+import '../cms/site_content.dart';
 import 'effects.dart';
 import 'motion.dart';
 
@@ -332,11 +334,11 @@ class _ProgrammeCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                Image.asset(
+                SiteImage(
+                  '${contentKey('programme', item.title)}.image',
                   item.image,
                   height: height * 0.46,
                   width: double.infinity,
-                  fit: BoxFit.cover,
                   semanticLabel: item.title,
                 ),
                 Positioned(

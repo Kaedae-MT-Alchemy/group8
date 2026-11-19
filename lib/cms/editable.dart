@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../data/mock_data.dart';
 import '../shared/image_compress.dart';
 import '../theme.dart';
 import 'site_content.dart';
@@ -126,11 +127,15 @@ class CmsImage extends StatelessWidget {
     super.key,
     required this.builder,
     this.label,
+    this.compact = false,
   });
   final String contentKey;
   final String fallback;
   final Widget Function(BuildContext context, ImageProvider image) builder;
   final String? label;
+
+  /// Small images (logos, thumbnails) get a round icon button instead.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -143,27 +148,116 @@ class CmsImage extends StatelessWidget {
         fit: StackFit.passthrough,
         children: [
           child,
-          Positioned(
-            left: 12,
-            top: 12,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: Tok.accent,
-                foregroundColor: Tok.brandDeep,
+          if (compact)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: IconButton.filled(
+                tooltip: 'Change image',
+                style: IconButton.styleFrom(
+                  backgroundColor: Tok.accent,
+                  foregroundColor: Tok.brandDeep,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(26, 26),
+                ),
+                iconSize: 15,
+                onPressed: () => showImageEditor(
+                  context,
+                  contentKey: contentKey,
+                  fallback: fallback,
+                  label: label ?? 'Image',
+                ),
+                icon: const Icon(Icons.image_outlined),
               ),
-              onPressed: () => showImageEditor(
-                context,
-                contentKey: contentKey,
-                fallback: fallback,
-                label: label ?? 'Image',
+            )
+          else
+            Positioned(
+              left: 12,
+              top: 12,
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Tok.accent,
+                  foregroundColor: Tok.brandDeep,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+                onPressed: () => showImageEditor(
+                  context,
+                  contentKey: contentKey,
+                  fallback: fallback,
+                  label: label ?? 'Image',
+                ),
+                icon: const Icon(Icons.image_outlined, size: 18),
+                label: const Text('Change image'),
               ),
-              icon: const Icon(Icons.image_outlined, size: 18),
-              label: const Text('Change image'),
             ),
-          ),
         ],
       );
     },
+  );
+}
+
+/// A photo the super admin can replace in edit mode. [contentKey] names the
+/// slot, so the same default photo can be changed in one place only.
+class SiteImage extends StatelessWidget {
+  const SiteImage(
+    this.contentKey,
+    this.fallback, {
+    super.key,
+    this.fit = BoxFit.cover,
+    this.width,
+    this.height,
+    this.semanticLabel,
+    this.label,
+  });
+  final String contentKey;
+  final String fallback;
+  final BoxFit fit;
+  final double? width;
+  final double? height;
+  final String? semanticLabel;
+  final String? label;
+
+  @override
+  Widget build(BuildContext context) => CmsImage(
+    contentKey,
+    fallback,
+    label: label ?? semanticLabel,
+    compact: width != null && width! < 200,
+    builder: (context, image) => Image(
+      image: image,
+      fit: fit,
+      width: width,
+      height: height,
+      semanticLabel: semanticLabel,
+      errorBuilder: (context, _, _) => Container(
+        width: width,
+        height: height,
+        color: Tok.brandTint,
+        alignment: Alignment.center,
+        child: const Icon(Icons.image_not_supported_outlined, color: Tok.brand),
+      ),
+    ),
+  );
+}
+
+/// Cover photo of a course. Admins change it in edit mode or in Course
+/// management; the default comes from the course itself.
+class CourseCover extends StatelessWidget {
+  const CourseCover(this.course, {super.key, this.width, this.height});
+  final Course course;
+  final double? width;
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) => SiteImage(
+    courseImageKey(course.id),
+    course.imageAsset,
+    width: width,
+    height: height,
+    semanticLabel: course.title,
+    label: 'Course photo: ${course.title}',
   );
 }
 

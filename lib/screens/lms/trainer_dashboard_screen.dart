@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../cms/editable.dart';
+
 import '../../backend/backend.dart';
 import '../../data/mock_data.dart';
 import '../../data/quiz_attempts.dart';
@@ -628,11 +630,10 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(18),
                       ),
-                      child: Image.asset(
-                        c.imageAsset,
+                      child: CourseCover(
+                        c,
                         height: 140,
                         width: double.infinity,
-                        fit: BoxFit.cover,
                       ),
                     ),
                     Padding(

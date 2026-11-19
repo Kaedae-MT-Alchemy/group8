@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../cms/editable.dart';
 import '../../widgets.dart';
 import '../../commerce/commerce_prototype_store.dart';
 import '../../shared/profile_page.dart';
@@ -182,11 +184,10 @@ class _LearnerDashboardScreenState extends State<LearnerDashboardScreen> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(14),
-                                child: Image.asset(
-                                  current.imageAsset,
+                                child: CourseCover(
+                                  current,
                                   width: 120,
                                   height: 96,
-                                  fit: BoxFit.cover,
                                 ),
                               ),
                               const SizedBox(width: 16),
