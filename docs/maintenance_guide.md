@@ -7,7 +7,10 @@
 | Add a trainer or admin | Admin portal → Users → Add user (temporary password; they change it in My profile) |
 | Change a role, suspend or remove someone | Admin portal → Users |
 | Review employer organizations | Admin portal → Organizations |
-| Add or edit courses, set price, pass mark, status, PDF, video, quiz | Admin portal → Course management (trainers: Trainer dashboard → Courses → Add or edit courses). Save as **Draft**, then set **Published** when ready; **Archived** hides it. |
+| Add or edit courses, set price, status and prerequisites | Admin portal → Course management → **Edit details** (trainers: Trainer dashboard → Courses). Save as **Draft**, then set **Published** when ready; **Archived** hides it. |
+| Add or change modules, lessons, files and quiz questions | Admin portal → Course management → **Lessons & quiz**. Upload PDF, PPT/PPTX, DOC/DOCX or MP4 (up to 10 MB) or paste YouTube/web links; build questions of every type; set the pass mark; press **Save content**. |
+| Change a photo or text on the public website | Sign in as admin, open the page, press **Edit this page**, then **Change image** or the pencil. **Reset to original** undoes it. All changes are listed under Admin portal → Website content. |
+| Send a customer their invoice or receipt | Admin portal → Order management → **Download / Print** on the order. |
 | Add products, stock, images, publish/unpublish | Admin portal → Product management |
 | Confirm bank-transfer payments, ship orders | Admin portal → Order management (Paid → Processing → Shipped → Delivered). Customers are notified. |
 | Answer quotes and enquiries | Admin portal → Quote requests / Contact enquiry inbox |
