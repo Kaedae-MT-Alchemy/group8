@@ -103,10 +103,12 @@ MT Alchemy is a people-development consultancy specialising in emotional intelli
 | <img src="docs/screenshots/course_player_slides.jpg" width="420" /> | <img src="docs/screenshots/course_player_pdf.jpg" width="420" /> |
 | **Lessons & quiz builder (admin)** | **Receipt PDF** |
 | <img src="docs/screenshots/course_builder.jpg" width="420" /> | <img src="docs/screenshots/invoice.jpg" width="300" /> |
+| **Course player: video lesson** | **Homepage: programmes** |
+| <img src="docs/screenshots/course_player_video.jpg" width="420" /> | <img src="docs/screenshots/home_sections.jpg" width="420" /> |
 | **Programme page** | **Edit this page (super admin)** |
 | <img src="docs/screenshots/programme_page.jpg" width="420" /> | <img src="docs/screenshots/edit_mode.jpg" width="420" /> |
-| **Alchemy Assistant (Gemini)** | **Homepage sections** |
-| <img src="docs/screenshots/chatbot.jpg" width="420" /> | <img src="docs/screenshots/home_sections.jpg" width="420" /> |
+| **Alchemy Assistant (Gemini)** | **Stripe payment confirmed** |
+| <img src="docs/screenshots/chatbot.jpg" width="420" /> | <img src="docs/screenshots/payment_dialog.jpg" width="420" /> |
 
 <details>
 <summary>Phone layout</summary>
