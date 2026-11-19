@@ -102,9 +102,9 @@ const List<Course> seedCourses = [
       {
         'kind': 'Article',
         'title':
-            'What is emotional intelligence? (Greater Good Science Center, UC Berkeley)',
+            'Emotional intelligence and leadership effectiveness (Center for Creative Leadership)',
         'url':
-            'https://greatergood.berkeley.edu/topic/emotional_intelligence/definition',
+            'https://www.ccl.org/articles/leading-effectively-articles/emotional-intelligence-and-leadership-effectiveness/',
       },
       {
         'kind': 'Article',
@@ -220,9 +220,9 @@ const List<Course> seedCourses = [
       {
         'kind': 'Article',
         'title':
-            'What is emotional intelligence? (Greater Good Science Center, UC Berkeley)',
+            'Emotional intelligence and leadership effectiveness (Center for Creative Leadership)',
         'url':
-            'https://greatergood.berkeley.edu/topic/emotional_intelligence/definition',
+            'https://www.ccl.org/articles/leading-effectively-articles/emotional-intelligence-and-leadership-effectiveness/',
       },
       {
         'kind': 'Article',
@@ -261,9 +261,9 @@ const List<Course> seedCourses = [
       {
         'kind': 'Guide',
         'title':
-            'Understanding team effectiveness: Google\'s Project Aristotle (re:Work)',
+            'How to build psychologically safe workplaces (Center for Creative Leadership)',
         'url':
-            'https://rework.withgoogle.com/intl/en/guides/understanding-team-effectiveness',
+            'https://www.ccl.org/articles/leading-effectively-articles/what-is-psychological-safety-at-work/',
       },
       {
         'kind': 'Article',
@@ -390,9 +390,9 @@ const List<Course> seedCourses = [
       {
         'kind': 'Guide',
         'title':
-            'Understanding team effectiveness: Google\'s Project Aristotle (re:Work)',
+            'How to build psychologically safe workplaces (Center for Creative Leadership)',
         'url':
-            'https://rework.withgoogle.com/intl/en/guides/understanding-team-effectiveness',
+            'https://www.ccl.org/articles/leading-effectively-articles/what-is-psychological-safety-at-work/',
       },
     ],
   ),

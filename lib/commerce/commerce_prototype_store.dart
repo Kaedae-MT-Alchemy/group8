@@ -6,6 +6,7 @@ import '../backend/backend.dart';
 import '../backend/collection_sync.dart';
 import '../shared/notifications.dart';
 import 'package:flutter/material.dart';
+import '../shared/format.dart';
 import 'dart:typed_data';
 
 /// Sample catalogue records for the Member 3 prototype. Replace these with
@@ -1632,4 +1633,4 @@ class CommercePrototypeStore extends ChangeNotifier {
   }
 }
 
-String money(double value) => 'RM ${value.toStringAsFixed(2)}';
+String money(double value) => 'RM ${groupedNumber(value, decimals: 2)}';

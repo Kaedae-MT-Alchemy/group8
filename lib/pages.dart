@@ -8,6 +8,11 @@ import 'package:flutter/material.dart';
 
 import 'shared/file_export.dart';
 import 'shared/report_document.dart';
+import 'cms/content_admin_page.dart';
+import 'cms/editable.dart';
+import 'shared/effects.dart';
+import 'shared/motion.dart';
+import 'shared/programme_carousel.dart';
 import 'shared/ui_kit.dart';
 import 'theme.dart';
 import 'widgets.dart';
@@ -45,6 +50,16 @@ Route<dynamic> buildRoute(RouteSettings settings) {
           sessionId: q['session_id'],
           status: q['status'],
         ),
+      ),
+    );
+  }
+  if (route.startsWith('/p/')) {
+    final slug = route.substring(3);
+    return MaterialPageRoute(
+      settings: settings,
+      builder: (_) => SiteShell(
+        route: route,
+        child: SitePageView(slug: slug),
       ),
     );
   }
@@ -214,6 +229,7 @@ Route<dynamic> buildRoute(RouteSettings settings) {
     '/reports' => const LearningReportsPage(),
     '/admin' => const AdminDashboardPage(),
     '/admin/courses' => const CourseManagementPage(),
+    '/admin/content' => const ContentAdminPage(),
     '/admin/users' => const UserManagementPage(),
     '/admin/organizations' => const UserManagementPage(organizations: true),
     '/profile' => const AccountProfilePage(),
@@ -334,330 +350,300 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final products = CommercePrototypeStore.instance.publishedProducts
-        .take(3)
-        .toList();
+    final narrow = width < 600;
     return Column(
       children: [
-        // 1. Hero: brand promise + "I'm browsing as" paths.
-        Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [deepBlue, Color(0xFF1E1580)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: PageWidth(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: width < 600 ? 44 : 72),
-              child: LayoutBuilder(
-                builder: (context, box) {
-                  final wide = box.maxWidth >= 860;
-                  final text = Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        // 1. Hero: animated banner with the two ways in.
+        const _HomeHero(),
+        // 2. Key figures, counting up.
+        CmsSection(
+          'home.section.stats',
+          label: 'Key numbers',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Tok.surface,
+                  border: Border(bottom: BorderSide(color: Tok.border)),
+                ),
+                padding: EdgeInsets.symmetric(
+                  vertical: narrow ? Tok.s5 : Tok.s6,
+                ),
+                child: const PageWidth(
+                  child: TileGrid(
+                    maxColumns: 4,
+                    minTileWidth: 150,
                     children: [
-                      const Eyebrow(
-                        'People first. Possibility always.',
-                        light: true,
-                      ),
-                      const SizedBox(height: 18),
-                      Text(
-                        'Elevate your value: Master human intelligence in a rapidly evolving AI-driven world.',
-                        style: Theme.of(context).textTheme.displayLarge
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontSize: box.maxWidth < 600 ? 32 : 44,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Build self-aware leaders, resilient teams and a workplace where people thrive.',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 18,
-                          height: 1.55,
-                        ),
-                      ),
-                      const SizedBox(height: 26),
-                      const Text(
-                        "I'm browsing as:",
-                        style: TextStyle(
-                          color: softYellow,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      PathChoiceCard(
-                        icon: Icons.person_outline,
-                        title: 'An individual',
-                        text: 'Courses, certificates, coaching and resources',
-                        onTap: () => go(context, '/individual'),
-                      ),
-                      const SizedBox(height: 10),
-                      PathChoiceCard(
-                        icon: Icons.business_outlined,
-                        title: 'An organization',
-                        text: 'Programmes, team learning and employee reports',
-                        onTap: () => go(context, '/organizations'),
-                      ),
+                      _StatBandItem('1,100+', 'participants impacted'),
+                      _StatBandItem('6', 'focus areas for growth'),
+                      _StatBandItem('8', 'self-paced courses'),
+                      _StatBandItem('5', 'sectors served'),
                     ],
-                  );
-                  final photo = Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(26),
-                        child: Image.asset(
-                          'assets/images/home_hero_team_building.jpeg',
-                          height: wide ? 460 : 260,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned(
-                        left: wide ? -22 : 12,
-                        bottom: wide ? 28 : 12,
-                        child: const _FloatingBadge(
-                          icon: Icons.groups_2,
-                          value: '1,100+',
-                          label: 'participants impacted',
-                        ),
-                      ),
-                      Positioned(
-                        right: 12,
-                        top: 12,
-                        child: const _FloatingBadge(
-                          icon: Icons.workspace_premium,
-                          value: 'HRDC',
-                          label: 'certified trainer',
-                        ),
-                      ),
-                    ],
-                  );
-                  return wide
-                      ? Row(
-                          children: [
-                            Expanded(child: text),
-                            const SizedBox(width: 56),
-                            Expanded(child: photo),
-                          ],
-                        )
-                      : Column(
-                          children: [text, const SizedBox(height: 32), photo],
-                        );
-                },
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
-        // 2. Stats band.
-        Container(
-          width: double.infinity,
-          color: softYellow,
-          padding: const EdgeInsets.symmetric(vertical: 26),
-          child: PageWidth(
-            child: TileGrid(
-              maxColumns: 4,
-              minTileWidth: 170,
-              children: const [
-                _StatBandItem('1,100+', 'participants impacted'),
-                _StatBandItem('6', 'focus areas for growth'),
-                _StatBandItem('8', 'self-paced courses'),
-                _StatBandItem('5', 'sectors served'),
-              ],
-            ),
+            ],
           ),
         ),
         PageWidth(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 3. About + three activities.
-              const SectionTitle(
-                'Growth that starts from within.',
-                eyebrow: 'About MT Alchemy',
-                subtitle:
-                    'A people development consultancy helping individuals, teams and organizations grow through emotional intelligence, leadership, team effectiveness and workplace well-being.',
-              ),
-              ResponsiveGrid(
-                children: [
-                  PhotoFeatureCard(
-                    image: 'assets/images/stock/team_laughing.jpg',
-                    icon: Icons.business_outlined,
-                    title: 'Work With Us',
-                    text:
-                        'Strengthen leadership, culture and organizational well-being with tailored programmes.',
-                    cta: 'For organizations',
-                    onTap: () => go(context, '/organizations'),
-                  ),
-                  PhotoFeatureCard(
-                    image: 'assets/images/stock/online_learning.jpg',
-                    icon: Icons.school_outlined,
-                    title: 'Upskill With Us',
-                    text:
-                        'Self-paced courses with quizzes and certificates, plus scheduled public programmes.',
-                    cta: 'Browse courses',
-                    onTap: () => go(context, '/hub'),
-                  ),
-                  PhotoFeatureCard(
-                    image: 'assets/images/stock/journal.jpg',
-                    icon: Icons.shopping_bag_outlined,
-                    title: 'Shop',
-                    text:
-                        'Workbooks, journals and team kits that keep learning going after the workshop.',
-                    cta: 'Visit the store',
-                    onTap: () => go(context, '/store'),
-                  ),
-                ],
-              ),
-              // 4. Services.
-              const SectionTitle(
-                'What we do',
-                eyebrow: 'Our services',
-                subtitle:
-                    'Six focus areas, delivered as workshops, coaching and customised programmes.',
-              ),
-              ResponsiveGrid(
-                children: [
-                  for (final item in services)
-                    PhotoFeatureCard(
-                      image:
-                          serviceImages[item.$1] ??
-                          'assets/images/stock/planning.jpg',
-                      icon: item.$2,
-                      title: item.$1,
-                      text: item.$3,
-                      imageHeight: 150,
-                      cta: 'Explore service',
-                      onTap: () => go(context, '/services'),
+              CmsSection(
+                'home.section.programmes',
+                label: 'What we do (rotating cards)',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 3. Programme types on a rotating wheel.
+                    const SectionTitle(
+                      'What we do',
+                      eyebrow: 'Our programmes',
+                      subtitle:
+                          'Six focus areas, run as workshops, coaching or a programme built for your team. Use the arrows or swipe to look around.',
+                      center: true,
                     ),
-                ],
-              ),
-              // 5. Upskilling.
-              const SectionTitle(
-                'Learn at your own pace.',
-                eyebrow: 'Upskilling',
-                subtitle:
-                    'Build workplace skills with guided courses, practical resources and certificates.',
-              ),
-              ResponsiveGrid(
-                children: [
-                  for (final course in publishedCourses.take(3))
-                    CourseCard(
-                      course: course,
-                      onViewCourse: () =>
-                          go(context, '/course-detail', arguments: course.id),
-                      onContinueCourse: () =>
-                          go(context, '/course-player', arguments: course.id),
+                    Reveal(
+                      child: ProgrammeCarousel(
+                        items: [
+                          for (final (i, item) in services.indexed)
+                            ProgrammeItem(
+                              title: item.$1,
+                              text: item.$3,
+                              icon: item.$2,
+                              tag: 'Programme ${i + 1} of ${services.length}',
+                              image:
+                                  serviceImages[item.$1] ??
+                                  'assets/images/stock/planning.jpg',
+                              onOpen: () => go(context, '/services'),
+                            ),
+                        ],
+                      ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: OutlinedButton.icon(
-                  onPressed: () => go(context, '/hub'),
-                  icon: const Icon(Icons.grid_view_rounded),
-                  label: const Text('See all courses'),
+                  ],
                 ),
               ),
-              // 6. Corporate solutions split.
-              const SizedBox(height: 64),
-              _SplitFeature(
-                image: 'assets/images/workshop_group_discussion.jpeg',
-                eyebrow: 'Corporate solutions',
-                title: 'Develop your people. Strengthen your organization.',
-                points: const [
-                  'Leadership, communication and EQ programmes for teams',
-                  'Assign online courses and track progress by department',
-                  'Well-being assessments that show where to start',
-                ],
-                buttonLabel: 'For Organizations',
-                onPressed: () => go(context, '/organizations'),
-              ),
-              // 7. Store.
-              const SectionTitle(
-                'Tools for everyday practice.',
-                eyebrow: 'Store',
-                subtitle:
-                    'Explore workbooks, journals and tools that help you put learning into practice.',
-              ),
-              ResponsiveGrid(
-                children: [
-                  for (final (i, p) in products.indexed)
-                    PhotoFeatureCard(
-                      image:
-                          p.imagePath ??
-                          const [
-                            'assets/images/stock/journal.jpg',
-                            'assets/images/stock/reflection.jpg',
-                            'assets/images/stock/planning.jpg',
-                          ][i % 3],
-                      icon: p.digital
-                          ? Icons.download_outlined
-                          : Icons.local_shipping_outlined,
-                      title: p.name,
-                      text:
-                          '${p.digital ? 'Digital download' : 'Physical product'} · ${money(p.price)}',
-                      cta: 'View product',
-                      imageHeight: 160,
-                      onTap: () => go(context, '/product', arguments: p.id),
+              CmsSection(
+                'home.section.formats',
+                label: 'Programme formats (flip cards)',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Programme formats as flip cards.
+                    const SectionTitle(
+                      'Pick the format that fits.',
+                      eyebrow: 'How we work',
+                      subtitle:
+                          'Every focus area runs in four formats. Hover or tap a card to see what each one includes.',
                     ),
-                ],
-              ),
-              // 8. Impact gallery.
-              const SectionTitle(
-                'Real people. Meaningful experiences.',
-                eyebrow: 'Impact',
-                subtitle:
-                    'Experiential sessions with schools, corporate teams, youth groups and communities.',
-              ),
-              const _ImpactGallery(),
-              const SizedBox(height: 18),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: FilledButton.icon(
-                  onPressed: () => go(context, '/impact'),
-                  icon: const Icon(Icons.auto_stories_outlined),
-                  label: const Text('Read impact stories'),
+                    const _ProgrammeFormats(),
+                  ],
                 ),
               ),
-              // 9. Testimonials.
-              const SectionTitle(
-                'What our participants say',
-                eyebrow: 'Testimonials',
-                subtitle: 'Feedback from MT Alchemy programme participants.',
+              CmsSection(
+                'home.section.bento',
+                label: 'Growth that starts from within',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 4. Three ways to work with MT Alchemy.
+                    const SectionTitle(
+                      'Growth that starts from within.',
+                      eyebrow: 'About MT Alchemy',
+                      subtitle:
+                          'A people development consultancy helping individuals, teams and organizations grow through emotional intelligence, leadership, team effectiveness and workplace well-being.',
+                    ),
+                    BentoGrid(
+                      tiles: [
+                        BentoTile(
+                          image: 'assets/images/stock/team_laughing.jpg',
+                          icon: Icons.business_outlined,
+                          title: 'Work With Us',
+                          text:
+                              'Strengthen leadership, culture and organizational well-being with programmes designed around your teams.',
+                          cta: 'For organizations',
+                          onTap: () => go(context, '/organizations'),
+                        ),
+                        BentoTile(
+                          image: 'assets/images/stock/online_learning.jpg',
+                          icon: Icons.school_outlined,
+                          title: 'Upskill With Us',
+                          text:
+                              'Self-paced courses with quizzes and certificates, plus scheduled public programmes.',
+                          cta: 'Browse courses',
+                          onTap: () => go(context, '/hub'),
+                        ),
+                        BentoTile(
+                          image: 'assets/images/stock/journal.jpg',
+                          icon: Icons.shopping_bag_outlined,
+                          title: 'Shop',
+                          text:
+                              'Workbooks, journals and team kits that keep learning going after the workshop.',
+                          cta: 'Visit the store',
+                          onTap: () => go(context, '/store'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const ResponsiveGrid(
-                children: [
-                  _TestimonialCard(
-                    quote:
-                        'The trainer was very well-prepared and explained the content clearly with real-life examples.',
-                    detail: 'Participant feedback · Training session',
-                  ),
-                  _TestimonialCard(
-                    quote:
-                        'I learned the importance of empathic communication.',
-                    detail: 'Participant takeaway · Leadership learning',
-                  ),
-                  _TestimonialCard(
-                    quote:
-                        'All were good as it is a reminder to connect with myself.',
-                    detail: 'Participant feedback · Mindfulness programme',
-                  ),
-                ],
+              CmsSection(
+                'home.section.learning',
+                label: 'Learn at your own pace',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 5. How online learning works, as three steps.
+                    const SectionTitle(
+                      'Learn at your own pace.',
+                      eyebrow: 'Upskilling',
+                      subtitle:
+                          'Build workplace skills with guided courses, practical resources and certificates.',
+                    ),
+                    const _LearningSteps(),
+                    const SizedBox(height: Tok.s6),
+                    ResponsiveGrid(
+                      children: [
+                        for (final course in publishedCourses.take(3))
+                          TiltHover(
+                            child: CourseCard(
+                              course: course,
+                              onViewCourse: () => go(
+                                context,
+                                '/course-detail',
+                                arguments: course.id,
+                              ),
+                              onContinueCourse: () => go(
+                                context,
+                                '/course-player',
+                                arguments: course.id,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: Tok.s5),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: () => go(context, '/hub'),
+                        icon: const Icon(Icons.grid_view_rounded),
+                        label: const Text('See all courses'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 64),
+              // 6. Impact photos gliding past.
+              CmsSection(
+                'home.section.impact',
+                label: 'Impact photos',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SectionTitle(
+                      'Real people. Meaningful experiences.',
+                      eyebrow: 'Impact',
+                      subtitle:
+                          'Experiential sessions with schools, corporate teams, youth groups and communities.',
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        // 10. Final call to action.
+        CmsSection(
+          'home.section.impact',
+          label: 'Impact photos',
+          showBar: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Reveal(
+                child: Marquee(
+                  itemWidth: narrow ? 240 : 320,
+                  height: narrow ? 180 : 230,
+                  gap: Tok.s4,
+                  children: [
+                    for (final (path, label) in _ImpactGallery.photos)
+                      _ImpactPhoto(path: path, label: label),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        PageWidth(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CmsSection(
+                'home.section.impact',
+                label: 'Impact photos',
+                showBar: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: Tok.s5),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: FilledButton.icon(
+                        onPressed: () => go(context, '/impact'),
+                        icon: const Icon(Icons.auto_stories_outlined),
+                        label: const Text('Read impact stories'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              CmsSection(
+                'home.section.testimonials',
+                label: 'Testimonials',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 7. Testimonials.
+                    const SectionTitle(
+                      'What our participants say',
+                      eyebrow: 'Testimonials',
+                      subtitle:
+                          'Feedback from MT Alchemy programme participants.',
+                    ),
+                    const ResponsiveGrid(
+                      children: [
+                        _TestimonialCard(
+                          quote:
+                              'The trainer was very well-prepared and explained the content clearly with real-life examples.',
+                          detail: 'Participant feedback · Training session',
+                        ),
+                        _TestimonialCard(
+                          quote:
+                              'I learned the importance of empathic communication.',
+                          detail: 'Participant takeaway · Leadership learning',
+                        ),
+                        _TestimonialCard(
+                          quote:
+                              'All were good as it is a reminder to connect with myself.',
+                          detail:
+                              'Participant feedback · Mindfulness programme',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: Tok.s8),
+            ],
+          ),
+        ),
+        // 8. Final call to action.
         ImageBanner(
           image: 'assets/images/stock/handshake.jpg',
           eyebrow: 'Get in touch',
-          title: "Let's build a thriving workplace together.",
+          title: 'Ready to build a stronger workplace?',
           subtitle:
               'Start a conversation about leadership, team effectiveness and workplace well-being.',
           height: 280,
@@ -681,6 +667,223 @@ class HomePage extends StatelessWidget {
   }
 }
 
+class _HomeHero extends StatelessWidget {
+  const _HomeHero();
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    return Container(
+      width: double.infinity,
+      color: Tok.brand,
+      child: Stack(
+        children: [
+          const Positioned.fill(child: AmbientShapes()),
+          PageWidth(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: width < 600 ? 48 : 88),
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final wide = box.maxWidth >= 860;
+                  final small = box.maxWidth < 600;
+                  final text = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Reveal(
+                        child: CmsValue(
+                          'home.hero.eyebrow',
+                          'People first. Possibility always.',
+                          label: 'hero label',
+                          builder: (context, v) => Eyebrow(v, light: true),
+                        ),
+                      ),
+                      const SizedBox(height: Tok.s5),
+                      Reveal(
+                        delay: const Duration(milliseconds: 100),
+                        child: CmsText(
+                          'home.hero.title',
+                          'Elevate your value: Master *human intelligence* in a rapidly evolving AI-driven world.',
+                          label: 'hero headline',
+                          accent: Tok.accent,
+                          style: Tok.heading(
+                            small ? 34 : 50,
+                            color: Colors.white,
+                            height: 1.08,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: Tok.s4),
+                      Reveal(
+                        delay: const Duration(milliseconds: 200),
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              'Programmes for ',
+                              style: Tok.heading(
+                                small ? 20 : 24,
+                                color: Colors.white,
+                              ),
+                            ),
+                            RotatingWords(
+                              words: const [
+                                'leaders',
+                                'teams',
+                                'schools',
+                                'you',
+                              ],
+                              style: Tok.heading(
+                                small ? 20 : 24,
+                                color: Tok.accent,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: Tok.s4),
+                      const Reveal(
+                        delay: Duration(milliseconds: 280),
+                        child: CmsText(
+                          'home.hero.subtitle',
+                          'Build self-aware leaders, resilient teams and a workplace where people thrive.',
+                          label: 'hero intro',
+                          multiline: true,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            height: 1.55,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: Tok.s6),
+                      Reveal(
+                        delay: const Duration(milliseconds: 360),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "I'm browsing as:",
+                              style: TextStyle(
+                                color: Tok.accent,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: Tok.s3),
+                            PathChoiceCard(
+                              icon: Icons.person_outline,
+                              title: 'An individual',
+                              text:
+                                  'Courses, certificates, coaching and resources',
+                              onTap: () => go(context, '/individual'),
+                            ),
+                            const SizedBox(height: 10),
+                            PathChoiceCard(
+                              icon: Icons.business_outlined,
+                              title: 'An organization',
+                              text:
+                                  'Programmes, team learning and employee reports',
+                              onTap: () => go(context, '/organizations'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                  final photo = Reveal(
+                    delay: const Duration(milliseconds: 250),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Fine gold ring ornament behind the photo.
+                        Positioned(
+                          right: -28,
+                          top: -28,
+                          child: ExcludeSemantics(
+                            child: Container(
+                              width: 140,
+                              height: 140,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Tok.accent.withValues(alpha: 0.7),
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        CmsImage(
+                          'home.hero.image',
+                          'assets/images/home_hero_team_building.jpeg',
+                          label: 'hero photo',
+                          builder: (context, provider) => ClipRRect(
+                            borderRadius: BorderRadius.circular(28),
+                            child: Image(
+                              image: provider,
+                              height: wide ? 480 : 260,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              semanticLabel:
+                                  'MT Alchemy team building workshop participants',
+                            ),
+                          ),
+                        ),
+                        // Glass bubble floating over the photo corner.
+                        Positioned(
+                          left: wide ? -70 : -20,
+                          top: wide ? -60 : -30,
+                          child: FloatY(
+                            phase: 0.25,
+                            child: GlassBubble(size: wide ? 160 : 100),
+                          ),
+                        ),
+                        Positioned(
+                          left: wide ? -24 : 12,
+                          bottom: wide ? 32 : 12,
+                          child: const FloatY(
+                            child: _FloatingBadge(
+                              icon: Icons.groups_2,
+                              value: '1,100+',
+                              label: 'participants impacted',
+                            ),
+                          ),
+                        ),
+                        const Positioned(
+                          right: 12,
+                          top: 12,
+                          child: FloatY(
+                            phase: 0.5,
+                            child: _FloatingBadge(
+                              icon: Icons.workspace_premium,
+                              value: 'HRDC',
+                              label: 'certified trainer',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                  return wide
+                      ? Row(
+                          children: [
+                            Expanded(child: text),
+                            const SizedBox(width: 64),
+                            Expanded(child: photo),
+                          ],
+                        )
+                      : Column(
+                          children: [text, const SizedBox(height: 40), photo],
+                        );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _FloatingBadge extends StatelessWidget {
   const _FloatingBadge({
     required this.icon,
@@ -696,19 +899,27 @@ class _FloatingBadge extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(Tok.rMd + 4),
       boxShadow: const [
         BoxShadow(
-          color: Color(0x33000000),
-          blurRadius: 18,
-          offset: Offset(0, 8),
+          color: Color(0x3316105B),
+          blurRadius: 24,
+          offset: Offset(0, 10),
         ),
       ],
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: purple),
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: Tok.accent,
+            borderRadius: BorderRadius.circular(Tok.rSm + 2),
+          ),
+          child: Icon(icon, color: Tok.brandDeep, size: 20),
+        ),
         const SizedBox(width: 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -717,14 +928,15 @@ class _FloatingBadge extends StatelessWidget {
             Text(
               value,
               style: const TextStyle(
-                fontWeight: FontWeight.w900,
-                color: deepBlue,
+                fontFamily: Tok.display,
+                fontWeight: FontWeight.w700,
+                color: Tok.brand,
                 fontSize: 16,
               ),
             ),
             Text(
               label,
-              style: const TextStyle(fontSize: 11.5, color: Colors.black54),
+              style: const TextStyle(fontSize: 13, color: Tok.textMuted),
             ),
           ],
         ),
@@ -739,95 +951,248 @@ class _StatBandItem extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) => Row(
     children: [
-      Text(
-        value,
-        style: const TextStyle(
-          fontSize: 34,
-          fontWeight: FontWeight.w900,
-          color: deepBlue,
+      Container(
+        width: 3,
+        height: 52,
+        decoration: BoxDecoration(
+          color: Tok.accent,
+          borderRadius: BorderRadius.circular(2),
         ),
       ),
-      Text(label, style: const TextStyle(color: deepBlue, fontSize: 14.5)),
+      const SizedBox(width: Tok.s4),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CountUp(
+              value,
+              style: const TextStyle(
+                fontFamily: Tok.display,
+                fontSize: 34,
+                fontWeight: FontWeight.w600,
+                color: Tok.brand,
+                height: 1.1,
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(color: Tok.textMuted, fontSize: 15),
+            ),
+          ],
+        ),
+      ),
     ],
   );
 }
 
-class _SplitFeature extends StatelessWidget {
-  const _SplitFeature({
-    required this.image,
-    required this.eyebrow,
-    required this.title,
-    required this.points,
-    required this.buttonLabel,
-    required this.onPressed,
-  });
-  final String image;
-  final String eyebrow;
-  final String title;
-  final List<String> points;
-  final String buttonLabel;
-  final VoidCallback onPressed;
+/// Choose → Learn → Earn, joined by a line that draws itself in.
+class _LearningSteps extends StatelessWidget {
+  const _LearningSteps();
+
+  static const _steps = [
+    (
+      Icons.travel_explore_rounded,
+      'Choose a course',
+      'Pick a topic like leadership, mindfulness or well-being.',
+    ),
+    (
+      Icons.play_circle_outline_rounded,
+      'Learn with videos',
+      'Short lessons, real examples and articles you can read later.',
+    ),
+    (
+      Icons.workspace_premium_outlined,
+      'Earn a certificate',
+      'Pass the quiz and download a certificate anyone can verify.',
+    ),
+  ];
 
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(26),
-    child: Container(
-      color: const Color(0xFFF1ECFB),
-      child: LayoutBuilder(
-        builder: (context, box) {
-          final wide = box.maxWidth >= 820;
-          final copy = Padding(
-            padding: const EdgeInsets.all(34),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Eyebrow(eyebrow),
-                const SizedBox(height: 12),
-                Text(title, style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 18),
-                for (final p in points)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.check_circle, color: purple, size: 20),
-                        const SizedBox(width: 10),
-                        Expanded(child: Text(p)),
-                      ],
-                    ),
-                  ),
-                const SizedBox(height: 14),
-                FilledButton(onPressed: onPressed, child: Text(buttonLabel)),
-              ],
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) {
+      final wide = box.maxWidth >= 760;
+      final items = [
+        for (final (i, (icon, title, text)) in _steps.indexed)
+          Reveal(
+            delay: Duration(milliseconds: 140 * i),
+            child: _StepItem(
+              number: i + 1,
+              icon: icon,
+              title: title,
+              text: text,
             ),
-          );
-          final img = Image.asset(
-            image,
-            fit: BoxFit.cover,
-            height: wide ? 400 : 220,
-            width: double.infinity,
-          );
-          return wide
-              ? Row(
-                  children: [
-                    Expanded(child: copy),
-                    Expanded(child: img),
-                  ],
-                )
-              : Column(children: [img, copy]);
-        },
+          ),
+      ];
+      if (!wide) {
+        return Column(
+          children: [
+            for (final item in items)
+              Padding(
+                padding: const EdgeInsets.only(bottom: Tok.s5),
+                child: item,
+              ),
+          ],
+        );
+      }
+      return Stack(
+        children: [
+          Positioned(
+            left: 32,
+            right: box.maxWidth / 3,
+            top: 31,
+            child: const _DrawLine(),
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final item in items)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: Tok.s5),
+                    child: item,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      );
+    },
+  );
+}
+
+class _DrawLine extends StatefulWidget {
+  const _DrawLine();
+
+  @override
+  State<_DrawLine> createState() => _DrawLineState();
+}
+
+class _DrawLineState extends State<_DrawLine> {
+  bool _drawn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _drawn = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Reveal(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(end: _drawn ? 1 : 0),
+        duration: Motion.enabled(context)
+            ? const Duration(milliseconds: 1400)
+            : Duration.zero,
+        curve: Tok.easeInOut,
+        builder: (context, v, _) => FractionallySizedBox(
+          alignment: Alignment.centerLeft,
+          widthFactor: v,
+          child: Container(
+            height: 2,
+            decoration: BoxDecoration(
+              color: Tok.borderStrong,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
       ),
     ),
   );
 }
 
-class _ImpactGallery extends StatelessWidget {
-  const _ImpactGallery();
+class _StepItem extends StatelessWidget {
+  const _StepItem({
+    required this.number,
+    required this.icon,
+    required this.title,
+    required this.text,
+  });
+  final int number;
+  final IconData icon;
+  final String title;
+  final String text;
 
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          color: Tok.surface,
+          shape: BoxShape.circle,
+          border: Border.all(color: Tok.brandTint, width: 6),
+        ),
+        child: Icon(icon, color: Tok.brand, size: 28),
+      ),
+      const SizedBox(height: Tok.s4),
+      Text(
+        'STEP $number',
+        style: const TextStyle(
+          color: Tok.calmText,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.4,
+          fontSize: 12.5,
+        ),
+      ),
+      const SizedBox(height: Tok.s1),
+      Text(title, style: Tok.heading(20)),
+      const SizedBox(height: Tok.s1),
+      Text(text, style: const TextStyle(color: Tok.textMuted, height: 1.5)),
+    ],
+  );
+}
+
+class _ImpactPhoto extends StatelessWidget {
+  const _ImpactPhoto({required this.path, required this.label});
+  final String path;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(Tok.rLg),
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(path, fit: BoxFit.cover, semanticLabel: label),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Tok.brandDeep.withValues(alpha: 0.8),
+              ],
+              stops: const [0.5, 1],
+            ),
+          ),
+        ),
+        Positioned(
+          left: Tok.s4,
+          bottom: 14,
+          right: Tok.s4,
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 15.5,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _ImpactGallery {
   static const photos = [
     ('assets/images/impact_inti_workshop.jpeg', 'University workshop'),
     ('assets/images/impact_teachers_retreat.jpeg', 'Teachers retreat'),
@@ -836,54 +1201,6 @@ class _ImpactGallery extends StatelessWidget {
     ('assets/images/impact_creative_art.jpeg', 'Creative reflection'),
     ('assets/images/workshop_group_activity.jpeg', 'Corporate team building'),
   ];
-
-  @override
-  Widget build(BuildContext context) => TileGrid(
-    maxColumns: 3,
-    minTileWidth: 260,
-    children: [
-      for (final (path, label) in photos)
-        ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: Stack(
-            children: [
-              Image.asset(
-                path,
-                height: 210,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        deepBlue.withValues(alpha: 0.8),
-                      ],
-                      stops: const [0.5, 1],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 16,
-                bottom: 14,
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-    ],
-  );
 }
 
 class _TestimonialCard extends StatelessWidget {
@@ -892,15 +1209,24 @@ class _TestimonialCard extends StatelessWidget {
   final String detail;
   @override
   Widget build(BuildContext context) => InfoCard(
-    color: const Color(0xFFFFF8DE),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.format_quote, color: purple, size: 34),
-        const SizedBox(height: 12),
-        Text('“$quote”', style: const TextStyle(fontSize: 17, height: 1.55)),
-        const SizedBox(height: 18),
-        Text(detail, style: const TextStyle(color: Colors.black54)),
+        Row(
+          children: [
+            for (var i = 0; i < 5; i++)
+              const Icon(Icons.star_rounded, color: Tok.accent, size: 20),
+          ],
+        ),
+        const SizedBox(height: Tok.s4),
+        Text(
+          '“$quote”',
+          style: const TextStyle(fontSize: 17.5, height: 1.55, color: Tok.text),
+        ),
+        const SizedBox(height: Tok.s5),
+        Container(height: 1, color: Tok.border),
+        const SizedBox(height: Tok.s3),
+        Text(detail, style: const TextStyle(color: Tok.textMuted)),
       ],
     ),
   );
@@ -917,7 +1243,7 @@ class AboutPage extends StatelessWidget {
           'People grow. Teams flourish. Organizations thrive.',
           eyebrow: 'About us',
           subtitle:
-              'MT Alchemy believes lasting transformation begins with understanding both people and systems.',
+              'MT Alchemy believes lasting change begins with understanding both people and systems.',
         ),
         ResponsiveGrid(
           children: const [
@@ -930,7 +1256,7 @@ class AboutPage extends StatelessWidget {
               ),
             ),
             InfoCard(
-              color: Color(0xFFECE6FA),
+              color: Color(0xFFEFEAFE),
               child: _Statement(
                 title: 'Mission',
                 text:
@@ -977,7 +1303,7 @@ class AboutPage extends StatelessWidget {
               ),
             ),
             InfoCard(
-              color: Color(0xFFECE6FA),
+              color: Color(0xFFEFEAFE),
               child: _Statement(
                 title: 'Human-centred growth',
                 text:
@@ -1111,6 +1437,30 @@ class ServicesPage extends StatelessWidget {
           subtitle:
               'Explore six focus areas designed for healthier teams, stronger leaders and sustainable workplace growth.',
         ),
+        Reveal(
+          child: ProgrammeCarousel(
+            items: [
+              for (final (i, item) in services.indexed)
+                ProgrammeItem(
+                  title: item.$1,
+                  text: item.$3,
+                  icon: item.$2,
+                  tag: 'Focus area ${i + 1}',
+                  image:
+                      serviceImages[item.$1] ??
+                      'assets/images/stock/planning.jpg',
+                  onOpen: () => go(context, '/contact'),
+                ),
+            ],
+          ),
+        ),
+        const SectionTitle(
+          'Four ways to take part',
+          eyebrow: 'Formats',
+          subtitle: 'Hover or tap a card to see what each format includes.',
+        ),
+        const _ProgrammeFormats(),
+        const SectionTitle('Every focus area at a glance', eyebrow: 'Details'),
         ResponsiveGrid(
           children: [
             for (final item in services)
@@ -1129,30 +1479,29 @@ class ServicesPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Container(
-                      width: 58,
-                      height: 58,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
-                        color: softYellow.withValues(alpha: .45),
-                        borderRadius: BorderRadius.circular(16),
+                        color: Tok.accent,
+                        borderRadius: BorderRadius.circular(Tok.rMd),
                       ),
-                      child: Icon(item.$2, color: deepBlue),
+                      child: Icon(item.$2, color: Tok.brandDeep, size: 22),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: Tok.s4),
+                    Text(item.$1, style: Tok.heading(20)),
+                    const SizedBox(height: Tok.s2),
                     Text(
-                      item.$1,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      item.$3,
+                      style: const TextStyle(color: Tok.textMuted, height: 1.5),
                     ),
-                    const SizedBox(height: 12),
-                    Text(item.$3),
-                    const SizedBox(height: 18),
-                    const Text(
-                      'For teams, leaders and organizations seeking practical, people-centred development.',
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: Tok.s4),
                     const Text(
                       'Key objectives',
-                      style: TextStyle(fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        fontFamily: Tok.display,
+                        fontWeight: FontWeight.w600,
+                        color: Tok.brandDeep,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     const Text(
@@ -1244,7 +1593,7 @@ class CoachingPage extends StatelessWidget {
               ),
             ),
             InfoCard(
-              color: Color(0xFFECE6FA),
+              color: Color(0xFFEFEAFE),
               child: _Statement(
                 title: 'Emotional clarity',
                 text:
@@ -1260,7 +1609,7 @@ class CoachingPage extends StatelessWidget {
               ),
             ),
             InfoCard(
-              color: Color(0xFFECE6FA),
+              color: Color(0xFFEFEAFE),
               child: _Statement(
                 title: 'Purposeful action',
                 text:
@@ -1628,7 +1977,7 @@ class ProgrammesPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFFECE6FA),
+                color: const Color(0xFFEFEAFE),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
@@ -1636,13 +1985,13 @@ class ProgrammesPage extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.w700, color: deepBlue),
               ),
             ),
-          const SizedBox(height: 26),
-          const SectionTitle(
-            'Public programmes',
-            eyebrow: 'Fixed price',
-            subtitle:
-                'Scheduled sessions that individuals can join at a published fee.',
-          ),
+          if (canViewCorporate)
+            const SectionTitle(
+              'Public programmes',
+              eyebrow: 'Fixed price',
+              subtitle:
+                  'Scheduled sessions that individuals can join at a published fee.',
+            ),
           const ResponsiveGrid(
             children: [
               _PublicProgrammeCard(
@@ -2420,7 +2769,7 @@ class _ContactPageState extends State<ContactPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SectionTitle(
-          "Let's build a thriving workplace together.",
+          'Ready to build a stronger workplace?',
           eyebrow: 'Contact',
           subtitle:
               'Tell us what you want to strengthen and our team will get back to you.',
@@ -2934,7 +3283,7 @@ class IndividualHomePage extends StatelessWidget {
                             width: 52,
                             height: 52,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF1ECFB),
+                              color: const Color(0xFFEFEAFE),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(p.icon, color: purple),
@@ -3002,7 +3351,7 @@ class IndividualHomePage extends StatelessWidget {
                   spacing: 20,
                   children: [
                     Text(
-                      'Start your learning journey today.',
+                      'Start learning today.',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     FilledButton(
@@ -3019,4 +3368,45 @@ class IndividualHomePage extends StatelessWidget {
       ],
     );
   }
+}
+
+/// The four programme formats as flip cards.
+class _ProgrammeFormats extends StatelessWidget {
+  const _ProgrammeFormats();
+
+  @override
+  Widget build(BuildContext context) => const ResponsiveGrid(
+    maxColumns: 4,
+    minWidth: 220,
+    children: [
+      FlipCard(
+        icon: Icons.groups_2_outlined,
+        title: 'Workshops',
+        caption: 'Half-day or full-day, in person or online',
+        details:
+            'Hands-on group sessions for up to 30 people, with activities, reflection and a take-home workbook.',
+      ),
+      FlipCard(
+        icon: Icons.record_voice_over_outlined,
+        title: 'Coaching',
+        caption: 'One to one with a certified coach',
+        details:
+            'Six sessions planned around your goals, with a check-in after each one and a short progress report.',
+      ),
+      FlipCard(
+        icon: Icons.play_lesson_outlined,
+        title: 'Online courses',
+        caption: 'Self-paced, with a certificate',
+        details:
+            'Short video lessons, quizzes and resources you can finish at your own pace, then download a certificate.',
+      ),
+      FlipCard(
+        icon: Icons.tune_rounded,
+        title: 'Custom programmes',
+        caption: 'Built for your organisation',
+        details:
+            'We assess your team first, then combine workshops, coaching and courses into a plan that fits your goals.',
+      ),
+    ],
+  );
 }

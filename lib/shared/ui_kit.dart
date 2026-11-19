@@ -1,6 +1,12 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../cms/editable.dart';
+import '../cms/site_content.dart';
+import 'effects.dart';
+import 'motion.dart';
 
 /// Shared visual building blocks: image banners, stat tiles, photo cards and
 /// dashboard sections, so every page follows the same structure.
@@ -45,12 +51,22 @@ class ImageBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final key = contentKey('banner', title);
+    return CmsImage(
+      '$key.image',
+      image,
+      label: 'banner photo',
+      builder: (context, provider) => _banner(context, key, provider),
+    );
+  }
+
+  Widget _banner(BuildContext context, String key, ImageProvider provider) {
     final narrow = MediaQuery.sizeOf(context).width < 700;
-    return Container(
+    final banner = Container(
       width: double.infinity,
       constraints: BoxConstraints(minHeight: narrow ? height * 0.8 : height),
       decoration: BoxDecoration(
-        image: DecorationImage(image: AssetImage(image), fit: BoxFit.cover),
+        image: DecorationImage(image: provider, fit: BoxFit.cover),
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -58,9 +74,9 @@ class ImageBanner extends StatelessWidget {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              deepBlue.withValues(alpha: 0.94),
-              deepBlue.withValues(alpha: narrow ? 0.85 : 0.55),
-              deepBlue.withValues(alpha: narrow ? 0.75 : 0.15),
+              Tok.brand.withValues(alpha: 0.94),
+              Tok.brand.withValues(alpha: narrow ? 0.86 : 0.62),
+              Tok.brandDeep.withValues(alpha: narrow ? 0.7 : 0.2),
             ],
           ),
         ),
@@ -80,33 +96,60 @@ class ImageBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        eyebrow.toUpperCase(),
-                        style: const TextStyle(
-                          color: softYellow,
-                          letterSpacing: 1.6,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                      Reveal(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(width: 24, height: 2, color: Tok.accent),
+                            const SizedBox(width: 10),
+                            Flexible(
+                              child: CmsValue(
+                                '$key.eyebrow',
+                                eyebrow,
+                                label: 'banner label',
+                                builder: (context, v) => Text(
+                                  v.toUpperCase(),
+                                  style: const TextStyle(
+                                    color: Tok.accent,
+                                    letterSpacing: 1.6,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: narrow ? 30 : 40,
-                          height: 1.12,
-                          fontWeight: FontWeight.w800,
+                      Reveal(
+                        delay: const Duration(milliseconds: 90),
+                        child: CmsText(
+                          '$key.title',
+                          title,
+                          label: 'banner heading',
+                          accent: Tok.accent,
+                          style: Tok.heading(
+                            narrow ? 30 : 42,
+                            color: Colors.white,
+                            height: 1.12,
+                          ),
                         ),
                       ),
                       if (subtitle != null) ...[
                         const SizedBox(height: 14),
-                        Text(
-                          subtitle!,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                            height: 1.5,
+                        Reveal(
+                          delay: const Duration(milliseconds: 180),
+                          child: CmsText(
+                            '$key.subtitle',
+                            subtitle!,
+                            label: 'banner intro',
+                            multiline: true,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              height: 1.5,
+                            ),
                           ),
                         ),
                       ],
@@ -122,6 +165,18 @@ class ImageBanner extends StatelessWidget {
           ),
         ),
       ),
+    );
+    if (narrow) return banner;
+    return Stack(
+      children: [
+        banner,
+        Positioned(
+          right: 48,
+          top: 0,
+          bottom: 0,
+          child: Center(child: BrandOrnament(size: height * 0.78)),
+        ),
+      ],
     );
   }
 }
@@ -154,96 +209,114 @@ class _PhotoFeatureCardState extends State<PhotoFeatureCard> {
   bool _hover = false;
 
   @override
-  Widget build(BuildContext context) => MouseRegion(
-    onEnter: (_) => setState(() => _hover = true),
-    onExit: (_) => setState(() => _hover = false),
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
-      transform: Matrix4.translationValues(0, _hover ? -4 : 0, 0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE8E5F0)),
-        boxShadow: [
-          BoxShadow(
-            color: deepBlue.withValues(alpha: _hover ? 0.12 : 0.05),
-            blurRadius: _hover ? 26 : 14,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: widget.onTap,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                children: [
-                  Image.asset(
-                    widget.image,
-                    height: widget.imageHeight,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                  if (widget.icon != null)
-                    Positioned(
-                      left: 16,
-                      bottom: 12,
-                      child: Container(
-                        padding: const EdgeInsets.all(9),
-                        decoration: BoxDecoration(
-                          color: softYellow,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(widget.icon, color: deepBlue, size: 22),
-                      ),
-                    ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) => TiltHover(
+    maxTilt: 0.05,
+    child: MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Tok.surface,
+          borderRadius: BorderRadius.circular(Tok.rLg),
+          border: Border.all(color: _hover ? Tok.borderStrong : Tok.border),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: widget.onTap,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
                   children: [
-                    Text(
-                      widget.title,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(widget.text, style: const TextStyle(height: 1.5)),
-                    if (widget.onTap != null) ...[
-                      const SizedBox(height: 14),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            widget.cta,
-                            style: const TextStyle(
-                              color: royalBlue,
-                              fontWeight: FontWeight.w700,
-                            ),
+                    SizedBox(
+                      height: widget.imageHeight,
+                      width: double.infinity,
+                      child: ClipRect(
+                        child: AnimatedScale(
+                          scale: _hover && Motion.enabled(context) ? 1.04 : 1,
+                          duration: Tok.base,
+                          curve: Tok.easeOut,
+                          child: Image.asset(
+                            widget.image,
+                            height: widget.imageHeight,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            semanticLabel: widget.title,
                           ),
-                          const SizedBox(width: 6),
-                          AnimatedSlide(
-                            duration: const Duration(milliseconds: 180),
-                            offset: Offset(_hover ? 0.25 : 0, 0),
-                            child: const Icon(
-                              Icons.arrow_forward,
-                              size: 18,
-                              color: royalBlue,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ],
+                    ),
+                    if (widget.icon != null)
+                      Positioned(
+                        left: Tok.s4,
+                        bottom: Tok.s3,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Tok.accent,
+                            borderRadius: BorderRadius.circular(Tok.rMd),
+                          ),
+                          child: Icon(
+                            widget.icon,
+                            color: Tok.brandDeep,
+                            size: 22,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(Tok.s5),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.title, style: Tok.heading(20)),
+                      const SizedBox(height: Tok.s2),
+                      Text(
+                        widget.text,
+                        style: const TextStyle(
+                          height: 1.5,
+                          color: Tok.textMuted,
+                          fontSize: 15.5,
+                        ),
+                      ),
+                      if (widget.onTap != null) ...[
+                        const SizedBox(height: Tok.s4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget.cta,
+                                style: const TextStyle(
+                                  fontFamily: Tok.display,
+                                  color: Tok.brand,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            AnimatedSlide(
+                              duration: Tok.base,
+                              curve: Tok.easeOut,
+                              offset: Offset(_hover ? 0.3 : 0, 0),
+                              child: const Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 18,
+                                color: Tok.brand,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -258,7 +331,7 @@ class StatTile extends StatelessWidget {
     required this.icon,
     required this.value,
     required this.label,
-    this.color = purple,
+    this.color = Tok.brand,
     this.caption,
   });
   final IconData icon;
@@ -273,7 +346,7 @@ class StatTile extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: const Color(0xFFE8E5F0)),
+      border: Border.all(color: const Color(0xFFE8DFFE)),
     ),
     child: Row(
       children: [
@@ -294,16 +367,17 @@ class StatTile extends StatelessWidget {
               Text(
                 value,
                 style: const TextStyle(
+                  fontFamily: Tok.display,
                   fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: deepBlue,
+                  fontWeight: FontWeight.w600,
+                  color: Tok.brandDeep,
                 ),
               ),
               Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.black54),
+                style: const TextStyle(color: Tok.textMuted),
               ),
               if (caption != null)
                 Text(
@@ -381,7 +455,7 @@ class DashboardPanel extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: const Color(0xFFE8E5F0)),
+      border: Border.all(color: const Color(0xFFE8DFFE)),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -396,20 +470,13 @@ class DashboardPanel extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: deepBlue,
-                    ),
-                  ),
+                  Text(title, style: Tok.heading(18, color: Tok.brandDeep)),
                   if (subtitle != null)
                     Text(
                       subtitle!,
                       style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
+                        color: Tok.textMuted,
+                        fontSize: 14,
                       ),
                     ),
                 ],
@@ -463,12 +530,7 @@ class DashboardHeader extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              height: 1.15,
-            ),
+            style: Tok.heading(28, color: Colors.white, height: 1.15),
           ),
           const SizedBox(height: 8),
           Text(
@@ -485,30 +547,37 @@ class DashboardHeader extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [deepBlue, royalBlue]),
-        ),
-        child: wide
-            ? IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(flex: 3, child: text),
-                    Expanded(
-                      flex: 2,
-                      child: ShaderMask(
-                        shaderCallback: (r) => const LinearGradient(
-                          colors: [Colors.transparent, Colors.black],
-                          stops: [0, 0.35],
-                        ).createShader(r),
-                        blendMode: BlendMode.dstIn,
-                        child: Image.asset(image, fit: BoxFit.cover),
-                      ),
+        decoration: const BoxDecoration(color: Tok.brand),
+        child: Stack(
+          children: [
+            const Positioned(
+              left: -60,
+              bottom: -70,
+              child: Opacity(opacity: 0.7, child: BrandOrnament(size: 220)),
+            ),
+            wide
+                ? IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(flex: 3, child: text),
+                        Expanded(
+                          flex: 2,
+                          child: ShaderMask(
+                            shaderCallback: (r) => const LinearGradient(
+                              colors: [Colors.transparent, Colors.black],
+                              stops: [0, 0.35],
+                            ).createShader(r),
+                            blendMode: BlendMode.dstIn,
+                            child: Image.asset(image, fit: BoxFit.cover),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              )
-            : text,
+                  )
+                : text,
+          ],
+        ),
       ),
     );
   }
@@ -529,11 +598,13 @@ class HeaderButton extends StatelessWidget {
   final bool primary;
 
   @override
-  Widget build(BuildContext context) => primary
+  Widget build(BuildContext context) => Pop(child: _button());
+
+  Widget _button() => primary
       ? FilledButton.icon(
           style: FilledButton.styleFrom(
-            backgroundColor: softYellow,
-            foregroundColor: deepBlue,
+            backgroundColor: Tok.accent,
+            foregroundColor: Tok.brandDeep,
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           ),
           onPressed: onPressed,
@@ -574,16 +645,18 @@ class _PathChoiceCardState extends State<PathChoiceCard> {
   bool _hover = false;
 
   @override
-  Widget build(BuildContext context) => MouseRegion(
+  Widget build(BuildContext context) => Pop(hoverScale: 1.03, child: _card());
+
+  Widget _card() => MouseRegion(
     onEnter: (_) => setState(() => _hover = true),
     onExit: (_) => setState(() => _hover = false),
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 160),
       decoration: BoxDecoration(
-        color: _hover ? Colors.white : Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(18),
+        color: _hover ? Colors.white : Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(Tok.rLg),
         border: Border.all(
-          color: _hover ? softYellow : Colors.white.withValues(alpha: 0.3),
+          color: _hover ? Tok.accent : Colors.white.withValues(alpha: 0.28),
         ),
       ),
       child: Material(
@@ -612,8 +685,9 @@ class _PathChoiceCardState extends State<PathChoiceCard> {
                       Text(
                         widget.title,
                         style: TextStyle(
-                          color: _hover ? deepBlue : Colors.white,
-                          fontWeight: FontWeight.w800,
+                          fontFamily: Tok.display,
+                          color: _hover ? Tok.brand : Colors.white,
+                          fontWeight: FontWeight.w600,
                           fontSize: 17,
                         ),
                       ),
@@ -621,16 +695,21 @@ class _PathChoiceCardState extends State<PathChoiceCard> {
                       Text(
                         widget.text,
                         style: TextStyle(
-                          color: _hover ? Colors.black54 : Colors.white70,
-                          fontSize: 13.5,
+                          color: _hover ? Tok.textMuted : Colors.white,
+                          fontSize: 14.5,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward,
-                  color: _hover ? deepBlue : Colors.white,
+                AnimatedSlide(
+                  duration: Tok.base,
+                  curve: Tok.easeOut,
+                  offset: Offset(_hover ? 0.25 : 0, 0),
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    color: _hover ? Tok.brand : Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -639,4 +718,281 @@ class _PathChoiceCardState extends State<PathChoiceCard> {
       ),
     ),
   );
+}
+
+/// One photo tile in a [BentoGrid]: full-bleed photo with a frosted caption
+/// panel. The photo zooms slightly and the panel lifts on hover.
+class BentoTile extends StatefulWidget {
+  const BentoTile({
+    super.key,
+    required this.image,
+    required this.icon,
+    required this.title,
+    required this.text,
+    required this.cta,
+    required this.onTap,
+  });
+  final String image;
+  final IconData icon;
+  final String title;
+  final String text;
+  final String cta;
+  final VoidCallback onTap;
+
+  @override
+  State<BentoTile> createState() => _BentoTileState();
+}
+
+class _BentoTileState extends State<BentoTile> {
+  bool _hover = false;
+  String get _key => contentKey('tile', widget.title);
+
+  @override
+  Widget build(BuildContext context) {
+    final motion = Motion.enabled(context);
+    return Semantics(
+      button: true,
+      label: '${widget.title}. ${widget.text}. ${widget.cta}',
+      excludeSemantics: true,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(Tok.rLg + 4),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                AnimatedScale(
+                  scale: motion && _hover ? 1.05 : 1,
+                  duration: Tok.slow,
+                  curve: Tok.easeOut,
+                  child: CmsImage(
+                    '$_key.image',
+                    widget.image,
+                    label: 'tile photo',
+                    builder: (context, p) => Image(image: p, fit: BoxFit.cover),
+                  ),
+                ),
+                // Soft royal blue wash at the bottom so the panel reads.
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Tok.brand.withValues(alpha: 0),
+                        Tok.brandDeep.withValues(alpha: 0.45),
+                      ],
+                      stops: const [0.45, 1],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: Tok.s4,
+                  right: Tok.s4,
+                  bottom: Tok.s4,
+                  child: AnimatedSlide(
+                    offset: motion && _hover
+                        ? const Offset(0, -0.04)
+                        : Offset.zero,
+                    duration: Tok.base,
+                    curve: Tok.easeOut,
+                    child: _FrostedPanel(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: Tok.accent,
+                                  borderRadius: BorderRadius.circular(Tok.rSm),
+                                ),
+                                child: Icon(
+                                  widget.icon,
+                                  color: Tok.brand,
+                                  size: 19,
+                                ),
+                              ),
+                              const SizedBox(width: Tok.s3),
+                              Expanded(
+                                child: CmsText(
+                                  '$_key.title',
+                                  widget.title,
+                                  label: 'tile title',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Tok.heading(20),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: Tok.s2),
+                          CmsText(
+                            '$_key.text',
+                            widget.text,
+                            label: 'tile text',
+                            multiline: true,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Tok.textMuted,
+                              fontSize: 15.5,
+                              height: 1.45,
+                            ),
+                          ),
+                          const SizedBox(height: Tok.s3),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  widget.cta,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontFamily: Tok.display,
+                                    color: Tok.brand,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              AnimatedPadding(
+                                duration: Tok.base,
+                                curve: Tok.easeOut,
+                                padding: EdgeInsets.only(
+                                  left: motion && _hover ? 10 : 6,
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 18,
+                                  color: Tok.brand,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FrostedPanel extends StatelessWidget {
+  const _FrostedPanel({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(Tok.rLg),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+      child: Container(
+        padding: const EdgeInsets.all(Tok.s4 + 2),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.86),
+          borderRadius: BorderRadius.circular(Tok.rLg),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
+        ),
+        child: child,
+      ),
+    ),
+  );
+}
+
+/// Mixed-size photo grid: one large tile beside two stacked tiles on wide
+/// screens, a large tile over a pair on tablets, and a single column on
+/// phones.
+class BentoGrid extends StatelessWidget {
+  const BentoGrid({super.key, required this.tiles}) : assert(tiles.length == 3);
+  final List<Widget> tiles;
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
+    return LayoutBuilder(
+      builder: (context, box) {
+        final w = box.maxWidth;
+        final grow = (scale - 1).clamp(0.0, 1.0) * 160;
+        if (w >= 900) {
+          final h = 560.0 + grow;
+          return SizedBox(
+            height: h,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(flex: 3, child: Reveal(child: tiles[0])),
+                const SizedBox(width: Tok.s5),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: Reveal(
+                          delay: const Duration(milliseconds: 90),
+                          child: tiles[1],
+                        ),
+                      ),
+                      const SizedBox(height: Tok.s5),
+                      Expanded(
+                        child: Reveal(
+                          delay: const Duration(milliseconds: 180),
+                          child: tiles[2],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        if (w >= 600) {
+          return Column(
+            children: [
+              SizedBox(
+                height: 380 + grow,
+                child: Reveal(child: tiles[0]),
+              ),
+              const SizedBox(height: Tok.s5),
+              SizedBox(
+                height: 340 + grow,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: Reveal(child: tiles[1])),
+                    const SizedBox(width: Tok.s5),
+                    Expanded(child: Reveal(child: tiles[2])),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+        return Column(
+          children: [
+            for (final (i, t) in tiles.indexed) ...[
+              if (i > 0) const SizedBox(height: Tok.s4),
+              SizedBox(
+                height: 340 + grow,
+                child: Reveal(child: t),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
 }

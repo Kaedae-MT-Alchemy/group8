@@ -145,7 +145,7 @@ void main() {
       ('Course title', 'Safety training'),
       ('Description', 'Workplace skills'),
       ('Duration', '1 week'),
-      ('Modules — one per line', 'Getting started'),
+      ('Modules (one per line)', 'Getting started'),
       ('Price (RM)', '150'),
       ('Quiz questions', 'Ask for help? | Yes | No | Yes'),
     ]) {

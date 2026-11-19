@@ -186,7 +186,7 @@ class _BankTransferCardState extends State<BankTransferCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE4E1F0)),
+        border: Border.all(color: const Color(0xFFE8DFFE)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,7 +411,7 @@ class TransferReviewPanel extends StatelessWidget {
     decoration: BoxDecoration(
       color: const Color(0xFFF5F8FF),
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: const Color(0xFFE4E1F0)),
+      border: Border.all(color: const Color(0xFFE8DFFE)),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

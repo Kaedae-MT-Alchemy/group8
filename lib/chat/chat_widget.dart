@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../shared/effects.dart';
 import '../theme.dart';
 import 'chat_service.dart';
 
@@ -27,6 +28,7 @@ class _ChatOverlayState extends State<ChatOverlay> {
   final _scroll = ScrollController();
   final _focus = FocusNode();
   bool _thinking = false;
+  bool _greetingClosed = false;
 
   /// The launcher appears after the first frame so the page's focus scopes
   /// are laid out before the browser reports initial focus.
@@ -152,8 +154,62 @@ class _ChatOverlayState extends State<ChatOverlay> {
     );
   }
 
-  Widget _launcher(bool compact) => Semantics(
+  Widget _launcher(bool compact) => Column(
     key: const ValueKey('launcher'),
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      if (!compact && !_greetingClosed && _messages.isEmpty) ...[
+        PopInAfter(
+          delay: const Duration(milliseconds: 2500),
+          child: _greeting(),
+        ),
+        const SizedBox(height: 10),
+      ],
+      Pop(child: PulseHalo(child: _launcherButton(compact))),
+    ],
+  );
+
+  Widget _greeting() => Material(
+    color: Colors.white,
+    elevation: 4,
+    shadowColor: deepBlue.withValues(alpha: 0.2),
+    shape: const RoundedRectangleBorder(
+      side: BorderSide(color: Tok.border),
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
+        bottomLeft: Radius.circular(16),
+        bottomRight: Radius.circular(4),
+      ),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.only(left: 16),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: _toggle,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                'Hi! Need help picking a programme?',
+                style: TextStyle(color: Tok.text, fontSize: 15),
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Hide message',
+            icon: const Icon(Icons.close_rounded, size: 18),
+            color: Tok.textMuted,
+            onPressed: () => setState(() => _greetingClosed = true),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _launcherButton(bool compact) => Semantics(
     container: true,
     button: true,
     excludeSemantics: true,
@@ -240,7 +296,7 @@ class _ChatOverlayState extends State<ChatOverlay> {
                                   fontSize: 13,
                                   color: deepBlue,
                                 ),
-                                backgroundColor: const Color(0xFFF4F1FB),
+                                backgroundColor: const Color(0xFFF7F5FF),
                                 side: BorderSide.none,
                                 onPressed: () => _send(s),
                               ),
@@ -338,7 +394,7 @@ class _ChatOverlayState extends State<ChatOverlay> {
                     ? deepBlue
                     : m.error
                     ? const Color(0xFFFDECEC)
-                    : const Color(0xFFF4F1FB),
+                    : const Color(0xFFF7F5FF),
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
@@ -370,7 +426,7 @@ class _ChatOverlayState extends State<ChatOverlay> {
                             vertical: 8,
                           ),
                           visualDensity: VisualDensity.compact,
-                          side: const BorderSide(color: Color(0xFFD9D2EE)),
+                          side: const BorderSide(color: Color(0xFFD3C8F5)),
                         ),
                         onPressed: () => _openRoute(a.route, compact),
                         icon: const Icon(Icons.arrow_forward, size: 16),
@@ -403,7 +459,7 @@ class _ChatOverlayState extends State<ChatOverlay> {
             decoration: InputDecoration(
               hintText: 'Ask a question…',
               filled: true,
-              fillColor: const Color(0xFFF7F6FB),
+              fillColor: const Color(0xFFF7F5FF),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,
@@ -455,7 +511,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFFF4F1FB),
+          color: const Color(0xFFF7F5FF),
           borderRadius: BorderRadius.circular(16),
         ),
         child: AnimatedBuilder(

@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../backend/backend.dart';
 import '../data/mock_data.dart';
+import '../shared/format.dart';
 import '../widgets.dart';
 
 class CourseManagementPage extends StatefulWidget {
@@ -111,11 +112,11 @@ class _CourseManagementPageState extends State<CourseManagementPage> {
                     ],
                   ),
                   Text(
-                    '${c.instructor} · RM ${c.price.toStringAsFixed(0)} · pass mark ${c.passMark}%',
+                    '${c.instructor} · ${coursePrice(c.price)} · pass mark ${c.passMark}%',
                   ),
                   _EnrolmentCount(courseId: c.id),
                   Text(
-                    '${c.modules.length} modules · ${c.duration} · ${c.level}',
+                    '${plural(c.modules.length, 'module')} · ${c.duration} · ${c.level}',
                   ),
                   Text(c.pdfName ?? 'No PDF attached'),
                   Text('${c.quiz.length} custom quiz questions'),
@@ -337,7 +338,7 @@ class _CourseEditorState extends State<CourseEditor> {
                 (description, 'Description'),
                 (duration, 'Duration'),
                 (instructor, 'Instructor / trainer'),
-                (modules, 'Modules — one per line'),
+                (modules, 'Modules (one per line)'),
               ])
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),

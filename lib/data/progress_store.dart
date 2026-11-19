@@ -132,8 +132,12 @@ void completeCourse(String courseId, {int? score}) {
   saveProgress();
 }
 
-int progressFor(Course course) =>
-    ((completedLessons[course.id]?.length ?? 0) /
-            (course.modules.length * 4) *
-            100)
-        .round();
+int progressFor(Course course) {
+  // A course with no modules yet (a new draft) has no progress to show.
+  if (course.modules.isEmpty) return 0;
+  return ((completedLessons[course.id]?.length ?? 0) /
+          (course.modules.length * 4) *
+          100)
+      .round()
+      .clamp(0, 100);
+}

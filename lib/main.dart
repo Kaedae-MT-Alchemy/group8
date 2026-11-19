@@ -8,6 +8,9 @@ import 'commerce/commerce_prototype_store.dart';
 import 'data/mock_data.dart';
 import 'pages.dart';
 import 'shared/auth_prototype_store.dart';
+import 'cms/site_content.dart';
+import 'shared/effects.dart';
+import 'shared/text_size.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
@@ -20,6 +23,7 @@ Future<void> main() async {
   String? startupError;
   try {
     await Backend.initialize();
+    SiteContentStore.instance.start();
     await loadCourseCatalogue();
     await CommercePrototypeStore.instance.load();
     await AuthPrototypeStore.instance.restoreSession();
@@ -54,14 +58,18 @@ class MtAlchemyApp extends StatelessWidget {
           if (name != '/') buildRoute(RouteSettings(name: name)),
         ];
       },
-      builder: (context, child) => ChatOverlay(
-        child: startupError == null
-            ? child!
-            : Banner(
-                message: 'OFFLINE',
-                location: BannerLocation.topEnd,
-                child: child!,
-              ),
+      builder: (context, child) => TextSizeScope(
+        child: CursorHalo(
+          child: ChatOverlay(
+            child: startupError == null
+                ? child!
+                : Banner(
+                    message: 'OFFLINE',
+                    location: BannerLocation.topEnd,
+                    child: child!,
+                  ),
+          ),
+        ),
       ),
     );
   }

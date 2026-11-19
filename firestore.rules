@@ -144,6 +144,20 @@ service cloud.firestore {
         && changedOnly(['read']);
     }
 
+    // Website content the super admin edits (texts, photos, extra pages).
+    match /siteContent/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /siteImages/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /sitePages/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Issued certificates: public verification by ID, issued by the learner.
     match /certificates/{id} {
       allow read: if true;

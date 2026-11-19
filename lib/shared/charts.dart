@@ -62,7 +62,7 @@ class LabelledBarChart extends StatelessWidget {
               drawVerticalLine: false,
               horizontalInterval: top / 4,
               getDrawingHorizontalLine: (_) =>
-                  const FlLine(color: Color(0xFFECE8F5), strokeWidth: 1),
+                  const FlLine(color: Color(0xFFE8DFFE), strokeWidth: 1),
             ),
             borderData: FlBorderData(show: false),
             barTouchData: BarTouchData(
@@ -124,7 +124,7 @@ class LabelledBarChart extends StatelessWidget {
                       backDrawRodData: BackgroundBarChartRodData(
                         show: true,
                         toY: top,
-                        color: const Color(0xFFF4F1FB),
+                        color: const Color(0xFFF7F5FF),
                       ),
                     ),
                   ],
@@ -175,7 +175,7 @@ class StatusDonut extends StatelessWidget {
                         ? [
                             PieChartSectionData(
                               value: 1,
-                              color: const Color(0xFFECE8F5),
+                              color: const Color(0xFFE8DFFE),
                               radius: 22,
                               showTitle: false,
                             ),

@@ -451,7 +451,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ),
                       const SizedBox(height: 12),
                       const InfoCard(
-                        color: Color(0xFFF4F1FB),
+                        color: Color(0xFFF7F5FF),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

@@ -369,14 +369,14 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget _result(BuildContext context) {
     final score = _score;
     final total = _questions.length;
-    final passed = score / total >= _passMark;
+    final passed = total > 0 && score / total >= _passMark;
     final errorColor = Theme.of(context).colorScheme.error;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         InfoCard(
-          color: passed ? const Color(0xFFFFF0B9) : const Color(0xFFECE6FA),
+          color: passed ? const Color(0xFFFFF0B9) : const Color(0xFFEFEAFE),
           child: Column(
             children: [
               Icon(

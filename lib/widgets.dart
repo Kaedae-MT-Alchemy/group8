@@ -4,6 +4,11 @@ import 'shared/notifications.dart';
 import 'commerce/commerce_prototype_store.dart';
 import 'shared/auth_prototype_store.dart';
 import 'shared/profile_page.dart';
+import 'cms/editable.dart';
+import 'cms/site_content.dart';
+import 'shared/effects.dart';
+import 'shared/text_size.dart';
+import 'shared/motion.dart';
 import 'shared/ui_kit.dart';
 import 'theme.dart';
 
@@ -11,7 +16,7 @@ const navItems = <String, String>{
   'Home': '/',
   'About': '/about',
   'Services': '/services',
-  'Upskilling': '/upskilling',
+  'Courses': '/upskilling',
   'Store': '/store',
   'Insights': '/insights',
   'Contact': '/contact',
@@ -184,7 +189,7 @@ class SiteShell extends StatelessWidget {
                 ),
               ),
         leadingWidth: desktop ? null : (showBack ? 104 : 56),
-        toolbarHeight: 84,
+        toolbarHeight: 76,
         titleSpacing: desktop ? 36 : 16,
         title: InkWell(
           onTap: () => navTo(context, '/'),
@@ -199,8 +204,8 @@ class SiteShell extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: Image.asset(
                     'assets/images/logo_mt_alchemy.jpeg',
-                    width: 57.6,
-                    height: 57.6,
+                    width: 48,
+                    height: 48,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -213,16 +218,22 @@ class SiteShell extends StatelessWidget {
                         'MT ALCHEMY',
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
+                          fontFamily: Tok.display,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.4,
+                          color: Tok.brand,
                         ),
                       ),
                       if (!compactHeader)
                         const Text(
                           'Made to Thrive',
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 10, color: purple),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Tok.calmText,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                     ],
                   ),
@@ -239,7 +250,7 @@ class SiteShell extends StatelessWidget {
                 }.entries)
                   _NavLink(item.key, item.value, active: route == item.value),
                 PopupMenuButton<String>(
-                  tooltip: 'Corporate pages',
+                  tooltip: 'Programme pages',
                   onSelected: (value) => navTo(context, value),
                   position: PopupMenuPosition.under,
                   itemBuilder: (_) => [
@@ -251,13 +262,15 @@ class SiteShell extends StatelessWidget {
                     child: Row(
                       children: [
                         Text(
-                          'Corporate',
+                          'Programmes',
                           style: TextStyle(
+                            fontFamily: Tok.display,
+                            fontSize: 15,
                             color: deepBlue,
                             fontWeight:
                                 visibleCorporateNavItems.containsValue(route)
-                                ? FontWeight.w800
-                                : FontWeight.w500,
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                           ),
                         ),
                         const Icon(
@@ -270,13 +283,14 @@ class SiteShell extends StatelessWidget {
                   ),
                 ),
                 for (final item in const {
-                  'Upskilling': '/upskilling',
+                  'Courses': '/upskilling',
                   'Store': '/store',
                   'Insights': '/insights',
                   'Contact': '/contact',
                 }.entries)
                   _NavLink(item.key, item.value, active: route == item.value),
                 const SizedBox(width: 8),
+                const TextSizeButton(),
                 IconButton(
                   tooltip: 'Cart',
                   onPressed: () => navTo(context, '/cart'),
@@ -322,6 +336,7 @@ class SiteShell extends StatelessWidget {
                 const SizedBox(width: 28),
               ]
             : [
+                const TextSizeButton(),
                 if (signedIn) const NotificationBell(),
                 const SizedBox(width: 8),
               ],
@@ -338,8 +353,9 @@ class SiteShell extends StatelessWidget {
                       child: Text(
                         'MT ALCHEMY',
                         style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
+                          fontFamily: Tok.display,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
                           color: deepBlue,
                         ),
                       ),
@@ -361,6 +377,7 @@ class SiteShell extends StatelessWidget {
                         'Courses': '/admin/courses',
                         'Products': '/admin/products',
                         'Orders': '/admin/orders',
+                        'Website content': '/admin/content',
                       }.entries)
                         ListTile(
                           leading: const Icon(Icons.dashboard_outlined),
@@ -382,7 +399,7 @@ class SiteShell extends StatelessWidget {
                           title: Text(item.key),
                           selected: route == item.value,
                           selectedColor: deepBlue,
-                          selectedTileColor: softYellow.withValues(alpha: .28),
+                          selectedTileColor: Tok.brandTint,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -391,6 +408,16 @@ class SiteShell extends StatelessWidget {
                             navTo(context, item.value);
                           },
                         ),
+                      ),
+                    for (final p in SiteContentStore.instance.menuPages)
+                      ListTile(
+                        title: Text(p.title),
+                        selected: route == p.route,
+                        selectedColor: deepBlue,
+                        onTap: () {
+                          Navigator.pop(context);
+                          navTo(context, p.route);
+                        },
                       ),
                     if (workspaceRoute != null && workspaceLabel != null)
                       Material(
@@ -404,7 +431,7 @@ class SiteShell extends StatelessWidget {
                           title: Text(workspaceLabel),
                           selected: route == workspaceRoute,
                           selectedColor: deepBlue,
-                          selectedTileColor: softYellow.withValues(alpha: .28),
+                          selectedTileColor: Tok.brandTint,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -430,10 +457,10 @@ class SiteShell extends StatelessWidget {
                       const Padding(
                         padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
                         child: Text(
-                          'CORPORATE WEBSITE',
+                          'PROGRAMMES',
                           style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w900,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
                             letterSpacing: 1.5,
                             color: purple,
                           ),
@@ -446,9 +473,7 @@ class SiteShell extends StatelessWidget {
                             title: Text(item.key),
                             selected: route == item.value,
                             selectedColor: deepBlue,
-                            selectedTileColor: softYellow.withValues(
-                              alpha: .28,
-                            ),
+                            selectedTileColor: Tok.brandTint,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -463,41 +488,58 @@ class SiteShell extends StatelessWidget {
                 ),
               ),
             ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            ListenableBuilder(
-              listenable: CommercePrototypeStore.instance,
-              builder: (context, _) {
-                final error = CommercePrototypeStore.instance.storageError;
-                return error == null
-                    ? const SizedBox.shrink()
-                    : MaterialBanner(
-                        backgroundColor: const Color(0xFFFFF4E5),
-                        leading: const Icon(
-                          Icons.cloud_off_outlined,
-                          color: Color(0xFF9A5B00),
-                        ),
-                        content: Text(error),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              CommercePrototypeStore.instance.storageError =
-                                  null;
-                              CommercePrototypeStore.instance.refresh();
-                            },
-                            child: const Text('Dismiss'),
-                          ),
-                        ],
-                      );
-              },
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: ScrollProgress(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ListenableBuilder(
+                      listenable: CommercePrototypeStore.instance,
+                      builder: (context, _) {
+                        final error =
+                            CommercePrototypeStore.instance.storageError;
+                        return error == null
+                            ? const SizedBox.shrink()
+                            : MaterialBanner(
+                                backgroundColor: const Color(0xFFFFF4E5),
+                                leading: const Icon(
+                                  Icons.cloud_off_outlined,
+                                  color: Color(0xFF9A5B00),
+                                ),
+                                content: Text(error),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      CommercePrototypeStore
+                                              .instance
+                                              .storageError =
+                                          null;
+                                      CommercePrototypeStore.instance.refresh();
+                                    },
+                                    child: const Text('Dismiss'),
+                                  ),
+                                ],
+                              );
+                      },
+                    ),
+                    if (pageBanners[route] case final b?)
+                      ImageBanner(
+                        image: b.$1,
+                        eyebrow: b.$2,
+                        title: b.$3,
+                        height: 240,
+                      ),
+                    child,
+                    const SiteFooter(),
+                  ],
+                ),
+              ),
             ),
-            if (pageBanners[route] case final b?)
-              ImageBanner(image: b.$1, eyebrow: b.$2, title: b.$3, height: 240),
-            child,
-            const SiteFooter(),
-          ],
-        ),
+          ),
+          const Positioned(left: 20, bottom: 20, child: EditModeToggle()),
+        ],
       ),
     );
   }
@@ -538,34 +580,56 @@ class SectionTitle extends StatelessWidget {
   final bool center;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 72, bottom: 28),
-    child: Column(
-      crossAxisAlignment: center
-          ? CrossAxisAlignment.center
-          : CrossAxisAlignment.start,
-      children: [
-        if (eyebrow != null) Eyebrow(eyebrow!),
-        if (eyebrow != null) const SizedBox(height: 12),
-        Text(
-          title,
-          textAlign: center ? TextAlign.center : null,
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 14),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Text(
-              subtitle!,
+  Widget build(BuildContext context) {
+    final narrow = MediaQuery.sizeOf(context).width < 600;
+    // Content keys come from the original title, so the super admin's edits
+    // stay attached to this section.
+    final key = contentKey('section', title);
+    return Padding(
+      padding: EdgeInsets.only(top: narrow ? Tok.s8 : 88, bottom: Tok.s6),
+      child: Reveal(
+        child: Column(
+          crossAxisAlignment: center
+              ? CrossAxisAlignment.center
+              : CrossAxisAlignment.start,
+          children: [
+            if (eyebrow != null)
+              CmsValue(
+                '$key.eyebrow',
+                eyebrow!,
+                label: 'section label',
+                builder: (context, v) => Eyebrow(v),
+              ),
+            if (eyebrow != null) const SizedBox(height: Tok.s3),
+            CmsText(
+              '$key.title',
+              title,
+              label: 'section heading',
+              accent: Tok.brand,
               textAlign: center ? TextAlign.center : null,
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineLarge!.copyWith(fontSize: narrow ? 30 : 40),
             ),
-          ),
-        ],
-      ],
-    ),
-  );
+            if (subtitle != null) ...[
+              const SizedBox(height: Tok.s3),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680),
+                child: CmsText(
+                  '$key.subtitle',
+                  subtitle!,
+                  label: 'section intro',
+                  multiline: true,
+                  textAlign: center ? TextAlign.center : null,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class Eyebrow extends StatelessWidget {
@@ -573,14 +637,30 @@ class Eyebrow extends StatelessWidget {
   final String text;
   final bool light;
   @override
-  Widget build(BuildContext context) => Text(
-    text.toUpperCase(),
-    style: TextStyle(
-      color: light ? softYellow : purple,
-      fontSize: 12,
-      fontWeight: FontWeight.w900,
-      letterSpacing: 2,
-    ),
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 24,
+        height: 2,
+        decoration: BoxDecoration(
+          color: Tok.accent,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      const SizedBox(width: 10),
+      Flexible(
+        child: Text(
+          text.toUpperCase(),
+          style: TextStyle(
+            color: light ? Tok.accent : Tok.calmText,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.6,
+          ),
+        ),
+      ),
+    ],
   );
 }
 
@@ -599,15 +679,8 @@ class InfoCard extends StatelessWidget {
     padding: EdgeInsets.all(padding),
     decoration: BoxDecoration(
       color: color,
-      borderRadius: BorderRadius.circular(22),
-      border: Border.all(color: deepBlue.withValues(alpha: .08)),
-      boxShadow: [
-        BoxShadow(
-          color: deepBlue.withValues(alpha: .05),
-          blurRadius: 22,
-          offset: const Offset(0, 8),
-        ),
-      ],
+      borderRadius: BorderRadius.circular(Tok.rLg),
+      border: Border.all(color: Tok.border),
     ),
     child: Material(type: MaterialType.transparency, child: child),
   );
@@ -618,26 +691,31 @@ class ResponsiveGrid extends StatelessWidget {
     super.key,
     required this.children,
     this.minWidth = 280,
+    this.maxColumns = 3,
   });
   final List<Widget> children;
   final double minWidth;
+  final int maxColumns;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, box) {
       final columns = box.maxWidth >= 1000
-          ? 3
+          ? maxColumns
           : box.maxWidth >= 620
           ? 2
           : 1;
-      final width = (box.maxWidth - (columns - 1) * 20) / columns;
+      final width = (box.maxWidth - (columns - 1) * Tok.s5) / columns;
       return Wrap(
-        spacing: 20,
-        runSpacing: 20,
+        spacing: Tok.s5,
+        runSpacing: Tok.s5,
         children: [
-          for (final child in children)
+          for (final (i, child) in children.indexed)
             SizedBox(
               width: width < minWidth ? box.maxWidth : width,
-              child: child,
+              child: Reveal(
+                delay: Duration(milliseconds: 70 * (i % columns)),
+                child: child,
+              ),
             ),
         ],
       );
@@ -701,107 +779,203 @@ class PhotoCard extends StatelessWidget {
 
 class SiteFooter extends StatelessWidget {
   const SiteFooter({super.key});
+
+  static const _explore = {
+    'About': '/about',
+    'Services': '/services',
+    'Programmes': '/programmes',
+    'Courses': '/upskilling',
+    'Store': '/store',
+  };
+  static const _more = {
+    'Impact stories': '/impact',
+    'Insights': '/insights',
+    'Individual coaching': '/coaching',
+    'Verify a certificate': '/verify',
+    'Sitemap': '/sitemap',
+  };
+
   @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    margin: const EdgeInsets.only(top: 80),
-    color: deepBlue,
-    padding: const EdgeInsets.symmetric(vertical: 52, horizontal: 24),
-    child: PageWidth(
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        spacing: 40,
-        runSpacing: 32,
-        children: [
-          const SizedBox(
-            width: 330,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'MT ALCHEMY',
-                  style: TextStyle(
-                    color: softYellow,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  'Building emotionally intelligent leaders and resilient workplace cultures.',
-                  style: TextStyle(color: Colors.white, height: 1.6),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            width: 280,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'CONTACT',
-                  style: TextStyle(
-                    color: softYellow,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.4,
-                  ),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  '+60 11-7239 9249\nmabeltan.alchemy@gmail.com',
-                  style: TextStyle(color: Colors.white, height: 1.8),
-                ),
-              ],
-            ),
-          ),
-          const Text(
-            'NET4207 · Flutter + Firebase',
-            style: TextStyle(color: Colors.white70),
-          ),
-        ],
+  Widget build(BuildContext context) {
+    Widget heading(String t) => Padding(
+      padding: const EdgeInsets.only(bottom: Tok.s3),
+      child: Text(
+        t,
+        style: const TextStyle(
+          color: Tok.accent,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.4,
+          fontSize: 13,
+        ),
       ),
-    ),
-  );
+    );
+    Widget links(Map<String, String> items) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final e in items.entries)
+          TextButton(
+            onPressed: () => navTo(context, e.value),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              alignment: Alignment.centerLeft,
+              textStyle: const TextStyle(
+                fontFamily: Tok.body,
+                fontSize: 15.5,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            child: Text(e.key),
+          ),
+      ],
+    );
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: Tok.s8),
+      color: Tok.brandDeep,
+      padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 0),
+      child: PageWidth(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 48,
+              runSpacing: 32,
+              children: [
+                const SizedBox(
+                  width: 320,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'MT ALCHEMY',
+                        style: TextStyle(
+                          fontFamily: Tok.display,
+                          color: Tok.accent,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      SizedBox(height: Tok.s3),
+                      Text(
+                        'Building emotionally intelligent leaders and resilient workplace cultures.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          height: 1.6,
+                          fontSize: 15.5,
+                        ),
+                      ),
+                      SizedBox(height: Tok.s5),
+                      Text(
+                        '+60 11-7239 9249\nmabeltan.alchemy@gmail.com',
+                        style: TextStyle(color: Colors.white, height: 1.8),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 180,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [heading('EXPLORE'), links(_explore)],
+                  ),
+                ),
+                SizedBox(
+                  width: 200,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      heading('MORE'),
+                      ListenableBuilder(
+                        listenable: SiteContentStore.instance,
+                        builder: (context, _) => links({
+                          ..._more,
+                          for (final p in SiteContentStore.instance.menuPages)
+                            p.title: p.route,
+                        }),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: Tok.s6),
+            Container(height: 1, color: Colors.white24),
+            const SizedBox(height: Tok.s4),
+            const Text(
+              '© 2026 MT Alchemy · NET4207 · Flutter + Firebase',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _NavLink extends StatelessWidget {
+class _NavLink extends StatefulWidget {
   const _NavLink(this.label, this.route, {required this.active});
   final String label;
   final String route;
   final bool active;
 
   @override
+  State<_NavLink> createState() => _NavLinkState();
+}
+
+class _NavLinkState extends State<_NavLink> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 2),
-    child: TextButton(
-      onPressed: () => navTo(context, route),
-      style: TextButton.styleFrom(
-        foregroundColor: deepBlue,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: active ? FontWeight.w800 : FontWeight.w500,
-            ),
+    child: MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: TextButton(
+        onPressed: () => navTo(context, widget.route),
+        style: TextButton.styleFrom(
+          foregroundColor: deepBlue,
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 14),
+        ),
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                widget.label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: Tok.display,
+                  fontSize: 15,
+                  fontWeight: widget.active ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+              const SizedBox(height: 4),
+              // Gold underline slides in from the left on hover and stays
+              // under the current page.
+              TweenAnimationBuilder<double>(
+                tween: Tween(end: widget.active || _hover ? 1 : 0),
+                duration: Motion.enabled(context) ? Tok.slow : Duration.zero,
+                curve: Tok.easeOut,
+                builder: (context, t, _) => Transform(
+                  alignment: Alignment.centerLeft,
+                  transform: Matrix4.diagonal3Values(t, 1, 1),
+                  child: Container(
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: Tok.accent,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-            height: 2,
-            width: active ? 18 : 0,
-            decoration: BoxDecoration(
-              color: softYellow,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-        ],
+        ),
       ),
     ),
   );
@@ -885,7 +1059,7 @@ class _AccountMenu extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: const Color(0xFFE5E1F0)),
+          border: Border.all(color: const Color(0xFFE8DFFE)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -934,7 +1108,7 @@ const pageBanners = <String, (String, String, String)>{
   '/organizations': (
     'assets/images/stock/team_discussion.jpg',
     'For organizations',
-    'Build emotionally intelligent leaders and resilient workplace cultures.',
+    'Programmes that help teams grow together.',
   ),
   '/programmes': (
     'assets/images/stock/facilitator.jpg',
@@ -954,7 +1128,7 @@ const pageBanners = <String, (String, String, String)>{
   '/contact': (
     'assets/images/stock/handshake.jpg',
     'Contact',
-    "Let's build a thriving workplace together.",
+    'We’d love to hear from you.',
   ),
   '/sitemap': (
     'assets/images/stock/planning.jpg',

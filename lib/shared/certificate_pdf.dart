@@ -5,9 +5,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 const _deepBlue = PdfColor.fromInt(0xFF16105B);
-const _purple = PdfColor.fromInt(0xFF7655B7);
-const _yellow = PdfColor.fromInt(0xFFFFD45A);
-const _canvas = PdfColor.fromInt(0xFFFFFBF2);
+const _purple = PdfColor.fromInt(0xFF47416F);
+const _yellow = PdfColor.fromInt(0xFFFCC931);
+const _canvas = PdfColor.fromInt(0xFFF7F5FF);
 const _muted = PdfColor.fromInt(0xFF6B6880);
 
 /// Builds the certificate as a landscape A4 PDF that matches the on-screen

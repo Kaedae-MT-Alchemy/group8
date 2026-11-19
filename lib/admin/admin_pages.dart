@@ -247,6 +247,13 @@ class AdminDashboardPage extends StatelessWidget {
           ResponsiveGrid(
             children: [
               PortalAction(
+                title: 'Website content',
+                subtitle:
+                    'Change website text and photos, add or remove pages.',
+                icon: Icons.edit_note_outlined,
+                route: '/admin/content',
+              ),
+              PortalAction(
                 title: 'Users',
                 subtitle:
                     'Create accounts, change roles, suspend or remove users.',

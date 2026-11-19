@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/mock_data.dart';
 import '../../data/progress_store.dart';
+import '../../shared/format.dart';
 
 class CourseCard extends StatelessWidget {
   final Course course;
@@ -24,7 +25,7 @@ class CourseCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE8E5F0)),
+        border: Border.all(color: const Color(0xFFE8DFFE)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +41,12 @@ class CourseCard extends StatelessWidget {
           ),
           const SizedBox(height: 18),
 
-          Text(course.title, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            course.title,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
 
           Text(
@@ -53,6 +59,8 @@ class CourseCard extends StatelessWidget {
 
           Text(
             course.instructor,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 10),
@@ -68,14 +76,14 @@ class CourseCard extends StatelessWidget {
               ),
               _InfoItem(
                 icon: Icons.star_outline,
-                text: course.rating.toString(),
+                text: ratingLabel(course.rating),
               ),
             ],
           ),
           const SizedBox(height: 14),
 
           Text(
-            'RM ${course.price.toStringAsFixed(0)}',
+            coursePrice(course.price),
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
@@ -126,9 +134,9 @@ class _InfoItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 17, color: const Color(0xFF7655B7)),
+        Icon(icon, size: 17, color: const Color(0xFF47416F)),
         const SizedBox(width: 5),
-        Text(text),
+        Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
       ],
     );
   }

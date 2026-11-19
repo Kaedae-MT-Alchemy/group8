@@ -19,7 +19,7 @@ class CourseVideo extends StatelessWidget {
     final player = id == null ? null : youTubePlayer(id);
     if (player == null) {
       return Material(
-        color: const Color(0xFFF1ECFB),
+        color: const Color(0xFFEFEAFE),
         borderRadius: BorderRadius.circular(14),
         child: ListTile(
           leading: const Icon(Icons.play_circle_fill, color: purple, size: 36),
@@ -80,7 +80,7 @@ class CourseResources extends StatelessWidget {
               ),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: const Color(0xFFECE9FF),
+                  backgroundColor: const Color(0xFFEFEAFE),
                   child: Icon(_icon(r['kind'] ?? ''), color: deepBlue),
                 ),
                 title: Text(

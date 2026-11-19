@@ -1,9 +1,12 @@
 import '../../shared/learning_navigation.dart';
 import 'package:flutter/material.dart';
+
+import '../../theme.dart';
 import '../../widgets.dart';
 import '../../widgets/lms/course_media.dart';
 
 import '../../data/mock_data.dart';
+import '../../shared/format.dart';
 import '../../data/progress_store.dart';
 
 class CourseDetailScreen extends StatelessWidget {
@@ -80,8 +83,8 @@ class CourseDetailScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF16105B),
-                    borderRadius: BorderRadius.circular(24),
+                    color: Tok.brand,
+                    borderRadius: BorderRadius.circular(Tok.rLg),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,7 +136,7 @@ class CourseDetailScreen extends StatelessWidget {
                       _detailRow(
                         Icons.payments_outlined,
                         'Price',
-                        'RM ${course.price.toStringAsFixed(0)}',
+                        coursePrice(course.price),
                       ),
                       _detailRow(
                         Icons.workspace_premium_outlined,
@@ -197,7 +200,7 @@ class CourseDetailScreen extends StatelessWidget {
                       )
                         ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: const Color(0xFFECE9FF),
+                            backgroundColor: const Color(0xFFEFEAFE),
                             child: Text('${index + 1}'),
                           ),
                           title: Text(
@@ -267,7 +270,7 @@ class CourseDetailScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE8E5F0)),
+        border: Border.all(color: const Color(0xFFE8DFFE)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,7 +288,7 @@ class CourseDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF7655B7)),
+          Icon(icon, color: const Color(0xFF47416F)),
           const SizedBox(width: 12),
           Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w700)),
           Expanded(child: Text(value)),

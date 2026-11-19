@@ -363,7 +363,7 @@ class _DemoAccounts extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(18),
     decoration: BoxDecoration(
-      color: const Color(0xFFF4F1FB),
+      color: const Color(0xFFF7F5FF),
       borderRadius: BorderRadius.circular(18),
     ),
     child: Column(

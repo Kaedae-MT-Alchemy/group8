@@ -8,6 +8,7 @@ import '../theme.dart';
 import '../widgets.dart';
 import 'commerce_prototype_store.dart';
 import 'payment_gateway.dart';
+import '../shared/format.dart';
 import 'stripe_checkout.dart';
 
 ShopOrder? _buyCourse({
@@ -164,7 +165,7 @@ class _CourseEnrolScreenState extends State<CourseEnrolScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '${course.modules.length} modules · ${course.duration} · ${course.level} · certificate on passing',
+                          '${plural(course.modules.length, 'module')} · ${course.duration} · ${course.level} · certificate on passing',
                           style: const TextStyle(color: Colors.black54),
                         ),
                         const Divider(height: 32),

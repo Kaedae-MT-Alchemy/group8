@@ -103,7 +103,7 @@ class _LearnerDashboardScreenState extends State<LearnerDashboardScreen> {
               children: [
                 // 1. Greeting.
                 DashboardHeader(
-                  eyebrow: 'Your learning journey',
+                  eyebrow: 'Your learning',
                   title:
                       'Welcome, ${AuthPrototypeStore.instance.displayName ?? 'Learner'}',
                   subtitle: current == null
@@ -210,7 +210,7 @@ class _LearnerDashboardScreenState extends State<LearnerDashboardScreen> {
                                         minHeight: 8,
                                         color: purple,
                                         backgroundColor: const Color(
-                                          0xFFECE8F5,
+                                          0xFFE8DFFE,
                                         ),
                                       ),
                                     ),
@@ -263,7 +263,7 @@ class _LearnerDashboardScreenState extends State<LearnerDashboardScreen> {
                                                   ? const Color(0xFF2E7D32)
                                                   : purple,
                                               backgroundColor: const Color(
-                                                0xFFECE8F5,
+                                                0xFFE8DFFE,
                                               ),
                                             ),
                                             Text(
@@ -530,7 +530,7 @@ class TrainerFeedbackSection extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE8E5F0)),
+                    border: Border.all(color: const Color(0xFFE8DFFE)),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

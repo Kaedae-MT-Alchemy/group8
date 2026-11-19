@@ -116,8 +116,21 @@ class _StorePageState extends State<StorePage> {
               )
               .toList();
           if (products.isEmpty) {
-            return const InfoCard(
-              child: Text('No products match your search.'),
+            final searching = query.isNotEmpty || filter != 'All';
+            return InfoCard(
+              child: Row(
+                children: [
+                  const Icon(Icons.inventory_2_outlined, color: Tok.calm),
+                  const SizedBox(width: Tok.s3),
+                  Expanded(
+                    child: Text(
+                      searching
+                          ? 'Nothing matches that search. Try another word or pick “All”.'
+                          : 'New workbooks and kits are on the way. Check back soon.',
+                    ),
+                  ),
+                ],
+              ),
             );
           }
           return ResponsiveGrid(

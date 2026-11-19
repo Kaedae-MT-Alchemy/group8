@@ -188,7 +188,7 @@ class EmployerDashboardPage extends StatelessWidget {
                   'In progress': inProgress,
                   'Not started': notStarted,
                 },
-                colors: const [Color(0xFF2E7D32), purple, Color(0xFFD9D2EE)],
+                colors: const [Color(0xFF2E7D32), purple, Color(0xFFD3C8F5)],
               ),
             ),
           ),
@@ -208,7 +208,7 @@ class EmployerDashboardPage extends StatelessWidget {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
-                            backgroundColor: const Color(0xFFF1ECFB),
+                            backgroundColor: const Color(0xFFEFEAFE),
                             child: Text(
                               '${a['progress']}%',
                               style: const TextStyle(
@@ -436,7 +436,7 @@ class _EmployeeCard extends StatelessWidget {
   final Map<String, String> employee;
   @override
   Widget build(BuildContext context) => Card(
-    color: const Color(0xFFF8F6FF),
+    color: const Color(0xFFF7F5FF),
     margin: const EdgeInsets.symmetric(vertical: 6),
     child: Material(
       type: MaterialType.transparency,

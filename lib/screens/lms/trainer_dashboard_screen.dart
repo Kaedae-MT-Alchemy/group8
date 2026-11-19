@@ -9,6 +9,7 @@ import '../../shared/learning_navigation.dart';
 import '../../theme.dart';
 import '../../shared/charts.dart';
 import '../../shared/ui_kit.dart';
+import '../../shared/format.dart';
 import '../../widgets.dart';
 
 /// Trainer workspace: live quiz submissions to review, every learner's
@@ -56,9 +57,12 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
         final course = mockCourses.where((c) => c.id == id).firstOrNull;
         if (course == null) continue;
         final lessons = (done[id] as List?)?.length ?? 0;
-        final percent = (lessons / (course.modules.length * 4) * 100)
-            .round()
-            .clamp(0, 100);
+        final percent = course.modules.isEmpty
+            ? 0
+            : (lessons / (course.modules.length * 4) * 100).round().clamp(
+                0,
+                100,
+              );
         rows.add(
           _LearnerProgress(
             doc.id,
@@ -373,7 +377,7 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF1ECFB),
+                            color: const Color(0xFFEFEAFE),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(s.$1, color: purple),
@@ -574,7 +578,7 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
                           value: r.percent / 100,
                           minHeight: 6,
                           color: r.done ? const Color(0xFF2E7D32) : purple,
-                          backgroundColor: const Color(0xFFECE8F5),
+                          backgroundColor: const Color(0xFFE8DFFE),
                         ),
                       ),
                     ],
@@ -646,7 +650,7 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${c.modules.length} modules · ${c.level} · ${c.duration}',
+                            '${plural(c.modules.length, 'module')} · ${c.level} · ${c.duration}',
                             style: const TextStyle(color: Colors.black54),
                           ),
                           const SizedBox(height: 12),
